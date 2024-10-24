@@ -1,0 +1,77 @@
+esphome:
+  name: powerfeather
+  platformio_options:
+    board_build.flash_mode: dio
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  framework:
+    type: esp-idf
+
+logger:
+  level: DEBUG
+
+api:
+  password: "no"
+
+ota:
+  - platform: esphome
+    password: "no"
+
+wifi:
+  ssid: !secret ssid
+  password: !secret password
+
+captive_portal:
+
+external_components:
+  - source:
+      type: local
+      path: ../components
+
+powerfeather_mainboard:
+  battery_capacity: 1000
+  battery_type: "Generic_3V7"
+  supply_voltage:
+    name: "Supply Voltage"
+  supply_current:
+    name: "Supply Current"
+  supply_good:
+    name: "Supply Good"
+  battery_voltage:
+    name: "Battery Voltage"
+  battery_current:
+    name: "Battery Current"
+  battery_charge:
+    name: "Battery Charge"
+  battery_health:
+    name: "Battery Health"
+  battery_cycles:
+    name: "Battery Cycles"
+  battery_time_left:
+    name: "Battery Time Left"
+  battery_temperature:
+    name: "Battery Temperature"
+  enable_3V3:
+    name: "Enable 3V3"
+  enable_VSQT:
+    name: "Enable VSQT"
+  enable_battery_temp_sense:
+    name: "Enable Battery Temperature Sense"
+  enable_battery_charging:
+    name: "Enable Battery Charging"
+  enable_battery_fuel_gauge:
+    name: "Enable Battery Fuel Gauge"
+  ship_mode:
+    name: "Ship Mode"
+  shutdown:
+    name: "Shutdown"
+  powercycle:
+    name: "Powercycle"
+  supply_maintain_voltage:
+    name: "Supply Maintain Voltage"
+  battery_charging_max_current:
+    name: "Battery Charging Max Current"
+
+web_server:
