@@ -113,6 +113,10 @@ namespace esphome
       enable_3V3_ = rtc_gpio_get_level(EN_3V3);
       enable_VSQT_ = rtc_gpio_get_level(EN_VSQT);
       enable_EN_ = rtc_gpio_get_level(EN0);
+
+      bool enabled = false;
+      PowerFeather::Board.getCharger().getChargingEnabled(enabled);
+
       ESP_LOGI(TAG, "EN_3V3: %d,  EN_VSQT: %d,  EN: %d", enable_3V3_, enable_VSQT_, enable_EN_);
 
       enable_3V3_switch_->publish_state(enable_3V3_);

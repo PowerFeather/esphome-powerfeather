@@ -1,3 +1,5 @@
+import os
+
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import(
@@ -138,7 +140,7 @@ async def to_code(config):
     mainboard = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(mainboard, config)
 
-    cg.add_library("powerfeather/PowerFeather-SDK", "1.0.7")
+    cg.add_library(name="PowerFeather-SDK", version="1.0.7", repository=os.environ["SDK_DIR"])
 
     # Main
     if battery_capacity_config := config.get(CONF_BATTERY_CAPACITY):
