@@ -33,45 +33,67 @@ external_components:
 powerfeather_mainboard:
   battery_capacity: 1000
   battery_type: "Generic_3V7"
-  supply_voltage:
-    name: "Supply Voltage"
-  supply_current:
-    name: "Supply Current"
-  supply_good:
-    name: "Supply Good"
-  battery_voltage:
-    name: "Battery Voltage"
-  battery_current:
-    name: "Battery Current"
-  battery_charge:
-    name: "Battery Charge"
-  battery_health:
-    name: "Battery Health"
-  battery_cycles:
-    name: "Battery Cycles"
-  battery_time_left:
-    name: "Battery Time Left"
-  battery_temperature:
-    name: "Battery Temperature"
-  enable_3V3:
-    name: "Enable 3V3"
-  enable_VSQT:
-    name: "Enable VSQT"
-  enable_battery_temp_sense:
-    name: "Enable Battery Temperature Sense"
-  enable_battery_charging:
-    name: "Enable Battery Charging"
-  enable_battery_fuel_gauge:
-    name: "Enable Battery Fuel Gauge"
-  ship_mode:
-    name: "Ship Mode"
-  shutdown:
-    name: "Shutdown"
-  powercycle:
-    name: "Powercycle"
-  supply_maintain_voltage:
-    name: "Supply Maintain Voltage"
-  battery_charging_max_current:
-    name: "Battery Charging Max Current"
+  id: "my_powerfeather"
+
+sensor:
+  - platform: "powerfeather_mainboard"
+    powerfeather_mainboard_id: "my_powerfeather"
+    supply_voltage:
+      name: "Supply Voltage"
+    supply_current:
+      name: "Supply Current"
+    battery_voltage:
+      name: "Battery Voltage"
+    battery_current:
+      name: "Battery Current"
+    battery_charge:
+      name: "Battery Charge"
+    battery_health:
+      name: "Battery Health"
+    battery_cycles:
+      name: "Battery Cycles"
+    battery_time_left:
+      name: "Battery Time Left"
+    battery_temperature:
+      name: "Battery Temperature"
+
+binary_sensor:
+  - platform: "powerfeather_mainboard"
+    powerfeather_mainboard_id: "my_powerfeather"
+    supply_good:
+      name: "Supply Good"
+
+button:
+  - platform: "powerfeather_mainboard"
+    powerfeather_mainboard_id: "my_powerfeather"
+    ship_mode:
+      name: "Ship Mode"
+    shutdown:
+      name: "Shutdown"
+    powercycle:
+      name: "Powercycle"
+
+number:
+  - platform: "powerfeather_mainboard"
+    powerfeather_mainboard_id: "my_powerfeather"
+    supply_maintain_voltage:
+      name: "Supply Maintain Voltage"
+    battery_charging_max_current:
+      name: "Battery Charging Max Current"
+
+switch:
+  - platform: "powerfeather_mainboard"
+    powerfeather_mainboard_id: "my_powerfeather"
+    enable_3V3:
+      name: "Enable 3V3"
+    enable_VSQT:
+      name: "Enable VSQT"
+    enable_battery_temp_sense:
+      name: "Enable Battery Temperature Sense"
+    enable_battery_charging:
+      name: "Enable Battery Charging"
+    enable_battery_fuel_gauge:
+      name: "Enable Battery Fuel Gauge"
+
 
 web_server:
