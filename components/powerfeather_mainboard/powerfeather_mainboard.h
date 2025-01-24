@@ -3,8 +3,8 @@
 #include "esphome/core/component.h"
 #include "esphome/components/sensor/sensor.h"
 #include "esphome/components/binary_sensor/binary_sensor.h"
-#include "esphome/components/switch/switch.h"
 #include "esphome/components/number/number.h"
+#include "esphome/components/switch/switch.h"
 #include "esphome/components/button/button.h"
 
 #include <PowerFeather.h>
@@ -18,7 +18,7 @@ namespace esphome
       Generic_3V7
     };
 
-    enum TaskUpdateType
+   enum TaskUpdateType
     {
       SENSORS = 0,
       ENABLE_EN,
@@ -46,18 +46,18 @@ namespace esphome
       } data;
     } TaskUpdate;
 
+    class Updateable
+    {
+    public:
+      Updateable() = default;
+      void set_update_type(TaskUpdateType type) { type_ = type; }
+    protected:
+      TaskUpdateType type_;
+    };
+
     class PowerFeatherMainboard : public PollingComponent
     {
     public:
-      class Updateable
-      {
-      public:
-        Updateable() = default;
-        void set_update_type(TaskUpdateType type) { type_ = type; }
-      protected:
-        TaskUpdateType type_;
-      };
-
       void setup() override;
       void update() override;
       void dump_config() override;
@@ -102,39 +102,13 @@ namespace esphome
 
     private:
       static const size_t UPDATE_TASK_STACK_SIZE_ = 3192;
-
       static const size_t UPDATE_TASK_QUEUE_SIZE_ = 10;
       static const uint32_t UPDATE_TASK_QUEUE_WAIT_MS_ = 250;
 
-      QueueHandle_t update_task_queue_ = NULL;
-
-      sensor::Sensor *supply_voltage_sensor_;
-      sensor::Sensor *supply_current_sensor_;
-      binary_sensor::BinarySensor *supply_good_sensor_;
-      sensor::Sensor *battery_voltage_sensor_;
-      sensor::Sensor *battery_current_sensor_;
-      sensor::Sensor *battery_charge_sensor_;
-      sensor::Sensor *battery_health_sensor_;
-      sensor::Sensor *battery_cycles_sensor_;
-      sensor::Sensor *battery_time_left_sensor_;
-      sensor::Sensor *battery_temperature_sensor_;
-
-      switch_::Switch *enable_EN_switch_;
-      switch_::Switch *enable_3V3_switch_;
-      switch_::Switch *enable_VSQT_switch_;
-      switch_::Switch *enable_battery_temp_sense_;
-      switch_::Switch *enable_battery_charging_;
-      switch_::Switch *enable_battery_fuel_gauge_;
-
-      number::Number *supply_maintain_voltage_value_;
-      number::Number *battery_charging_max_current_value_;
-
       int32_t battery_capacity_;
       PowerFeather::Mainboard::BatteryType battery_type_;
-
       float supply_voltage_;
       float supply_current_;
-      bool supply_good_;
       float battery_voltage_;
       float battery_current_;
       uint8_t battery_charge_;
@@ -142,50 +116,39 @@ namespace esphome
       float battery_cycles_;
       float battery_time_left_;
       float battery_temperature_;
-
+      bool supply_good_;
       bool enable_EN_;
       bool enable_3V3_;
       bool enable_VSQT_;
-
-      button::Button *ship_mode_button_;
-      button::Button *shutdown_button_;
-      button::Button *powercycle_button_;
-
       bool enable_charging_;
       uint16_t battery_max_charging_current_;
       uint16_t supply_maintain_voltage_;
 
+      QueueHandle_t update_task_queue_ = NULL;
+
+      sensor::Sensor *supply_voltage_sensor_;
+      sensor::Sensor *supply_current_sensor_;
+      sensor::Sensor *battery_voltage_sensor_;
+      sensor::Sensor *battery_current_sensor_;
+      sensor::Sensor *battery_charge_sensor_;
+      sensor::Sensor *battery_health_sensor_;
+      sensor::Sensor *battery_cycles_sensor_;
+      sensor::Sensor *battery_time_left_sensor_;
+      sensor::Sensor *battery_temperature_sensor_;
+      binary_sensor::BinarySensor *supply_good_sensor_;
+      switch_::Switch *enable_EN_switch_;
+      switch_::Switch *enable_3V3_switch_;
+      switch_::Switch *enable_VSQT_switch_;
+      switch_::Switch *enable_battery_temp_sense_;
+      switch_::Switch *enable_battery_charging_;
+      switch_::Switch *enable_battery_fuel_gauge_;
+      button::Button *ship_mode_button_;
+      button::Button *shutdown_button_;
+      button::Button *powercycle_button_;
+      number::Number *supply_maintain_voltage_value_;
+      number::Number *battery_charging_max_current_value_;
+
       static void update_task_(void *param);
     };
-
-
-
-    class PowerFeatherSwitch : public switch_::Switch, public Parented<PowerFeatherMainboard>, public PowerFeatherMainboard::Updateable
-    {
-    public:
-      PowerFeatherSwitch() = default;
-
-    protected:
-      void write_state(bool state) override;
-    };
-
-    class PowerFeatherButton : public button::Button, public Parented<PowerFeatherMainboard>, public PowerFeatherMainboard::Updateable
-    {
-    public:
-      PowerFeatherButton() = default;
-
-    protected:
-      void press_action() override;
-    };
-
-    class PowerFeatherValue : public number::Number, public Parented<PowerFeatherMainboard>, public PowerFeatherMainboard::Updateable
-    {
-    public:
-      PowerFeatherValue() = default;
-
-    protected:
-      void control(float value) override;
-    };
-
   } // namespace empty_compound_sensor
 } // namespace esphome

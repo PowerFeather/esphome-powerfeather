@@ -179,30 +179,5 @@ namespace esphome
       xQueueSend(update_task_queue_, &update, portMAX_DELAY);
     }
 
-    void PowerFeatherSwitch::write_state(bool state)
-    {
-      TaskUpdate update;
-      update.type = type_;
-      update.data.b = state;
-      this->parent_->send_task_update(update);
-      this->publish_state(state);
-    }
-
-    void PowerFeatherValue::control(float value)
-    {
-      TaskUpdate update;
-      update.type = type_;
-      update.data.u = value * 1000;
-      this->parent_->send_task_update(update);
-      this->publish_state(value);
-    }
-
-    void PowerFeatherButton::press_action()
-    {
-      TaskUpdate update;
-      update.type = type_;
-      this->parent_->send_task_update(update);
-    }
-
   } // namespace empty_compound_sensor
 } // namespace esphome
