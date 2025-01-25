@@ -54,7 +54,7 @@ CONFIG_SCHEMA = POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA.extend(
             unit_of_measurement=UNIT_CELSIUS, icon=ICON_EMPTY
         ),
     }
-).extend(cv.polling_component_schema("60s"))
+)
 
 async def to_code(config):
     mainboard = await cg.get_variable(config[CONF_POWERFEATHER_MAINBOARD_ID])
