@@ -54,45 +54,75 @@ namespace esphome
         case TaskUpdateType::SENSORS:
         default:
         {
-          uint16_t supply_voltage = 0;
-          PowerFeather::Board.getSupplyVoltage(supply_voltage);
-          powerfeather_mainboard->supply_voltage_ = supply_voltage / 1000.0f;
+          if (powerfeather_mainboard->supply_voltage_sensor_)
+          {
+            uint16_t supply_voltage = 0;
+            PowerFeather::Board.getSupplyVoltage(supply_voltage);
+            powerfeather_mainboard->supply_voltage_ = supply_voltage / 1000.0f;
+          }
 
-          int16_t supply_current = 0;
-          PowerFeather::Board.getSupplyCurrent(supply_current);
-          powerfeather_mainboard->supply_current_ = supply_current / 1000.0f;
+          if (powerfeather_mainboard->supply_current_sensor_)
+          {
+            int16_t supply_current = 0;
+            PowerFeather::Board.getSupplyCurrent(supply_current);
+            powerfeather_mainboard->supply_current_ = supply_current / 1000.0f;
+          }
 
-          bool supply_good = false;
-          PowerFeather::Board.checkSupplyGood(supply_good);
-          powerfeather_mainboard->supply_good_ = supply_good;
+          if (powerfeather_mainboard->supply_good_sensor_)
+          {
+            bool supply_good = false;
+            PowerFeather::Board.checkSupplyGood(supply_good);
+            powerfeather_mainboard->supply_good_ = supply_good;
+          }
 
-          uint16_t battery_voltage = 0;
-          PowerFeather::Board.getBatteryVoltage(battery_voltage);
-          powerfeather_mainboard->battery_voltage_ = battery_voltage / 1000.0f;
+          if (powerfeather_mainboard->battery_voltage_sensor_)
+          {
+            uint16_t battery_voltage = 0;
+            PowerFeather::Board.getBatteryVoltage(battery_voltage);
+            powerfeather_mainboard->battery_voltage_ = battery_voltage / 1000.0f;
+          }
 
-          int16_t battery_current = 0;
-          PowerFeather::Board.getBatteryCurrent(battery_current);
-          powerfeather_mainboard->battery_current_ = battery_current / 1000.0f;
+          if (powerfeather_mainboard->battery_current_sensor_)
+          {
+            int16_t battery_current = 0;
+            PowerFeather::Board.getBatteryCurrent(battery_current);
+            powerfeather_mainboard->battery_current_ = battery_current / 1000.0f;
+          }
 
-          uint8_t battery_charge = 0;
-          PowerFeather::Board.getBatteryCharge(battery_charge);
-          powerfeather_mainboard->battery_charge_ = battery_charge;
+          if (powerfeather_mainboard->battery_charge_sensor_)
+          {
+            uint8_t battery_charge = 0;
+            PowerFeather::Board.getBatteryCharge(battery_charge);
+            powerfeather_mainboard->battery_charge_ = battery_charge;
+          }
 
-          uint8_t battery_health = 0;
-          PowerFeather::Board.getBatteryHealth(battery_health);
-          powerfeather_mainboard->battery_health_ = battery_health;
+          if (powerfeather_mainboard->battery_health_sensor_)
+          {
+            uint8_t battery_health = 0;
+            PowerFeather::Board.getBatteryHealth(battery_health);
+            powerfeather_mainboard->battery_health_ = battery_health;
+          }
 
-          uint16_t battery_cycles = 0;
-          PowerFeather::Board.getBatteryCycles(battery_cycles);
-          powerfeather_mainboard->battery_cycles_ = battery_cycles;
+          if (powerfeather_mainboard->battery_cycles_sensor_)
+          {
+            uint16_t battery_cycles = 0;
+            PowerFeather::Board.getBatteryCycles(battery_cycles);
+            powerfeather_mainboard->battery_cycles_ = battery_cycles;
+          }
 
-          int battery_time_left = 0;
-          PowerFeather::Board.getBatteryTimeLeft(battery_time_left);
-          powerfeather_mainboard->battery_time_left_ = battery_time_left;
+          if (powerfeather_mainboard->battery_time_left_sensor_)
+          {
+            int battery_time_left = 0;
+            PowerFeather::Board.getBatteryTimeLeft(battery_time_left);
+            powerfeather_mainboard->battery_time_left_ = battery_time_left;
+          }
 
-          float battery_temperature = 0;
-          PowerFeather::Board.getBatteryTemperature(battery_temperature);
-          powerfeather_mainboard->battery_temperature_ = battery_temperature;
+          if (powerfeather_mainboard->battery_temperature_sensor_)
+          {
+            float battery_temperature = 0;
+            PowerFeather::Board.getBatteryTemperature(battery_temperature);
+            powerfeather_mainboard->battery_temperature_ = battery_temperature;
+          }
         }
         break;
         }
