@@ -47,7 +47,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_BATTERY_CAPACITY): cv.positive_int,
         cv.Optional(CONF_BATTERY_TYPE): cv.enum(BATTERY_TYPES),
     }
-).extend(cv.polling_component_schema("60s"))
+).extend(cv.polling_component_schema("1s"))
 
 async def to_code(config):
     mainboard = cg.new_Pvariable(config[CONF_ID])

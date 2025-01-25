@@ -39,15 +39,49 @@ namespace esphome
           PowerFeather::Board.enableVSQT(powerfeather_mainboard->enable_VSQT_);
           break;
 
+        case TaskUpdateType::ENABLE_BATTERY_TEMP_SENSE:
+          ESP_LOGI(TAG, "Recieved enable battery temp sense: %d", update.data.b);
+          powerfeather_mainboard->enable_battery_temp_sense_ = update.data.b;
+          PowerFeather::Board.enableBatteryTempSense(powerfeather_mainboard->enable_battery_temp_sense_);
+          break;
+
+        case TaskUpdateType::ENABLE_BATTERY_FUEL_GAUGE:
+          ESP_LOGI(TAG, "Recieved enable battery fuel gauge: %d", update.data.b);
+          powerfeather_mainboard->enable_battery_fuel_gauge_ = update.data.b;
+          PowerFeather::Board.enableBatteryFuelGauge(powerfeather_mainboard->enable_battery_fuel_gauge_);
+          break;
+
+        case TaskUpdateType::ENABLE_BATTERY_CHARGING:
+          ESP_LOGI(TAG, "Recieved enable battery charging: %d", update.data.b);
+          powerfeather_mainboard->enable_battery_charging_ = update.data.b;
+          PowerFeather::Board.enableBatteryCharging(powerfeather_mainboard->enable_battery_charging_);
+          break;
+
+        case TaskUpdateType::POWERCYCLE:
+          ESP_LOGI(TAG, "Recieved powercycle request");
+          PowerFeather::Board.doPowerCycle();
+          break;
+
+        case TaskUpdateType::SHIP_MODE:
+          ESP_LOGI(TAG, "Recieved ship mode request");
+          PowerFeather::Board.enterShipMode();
+          break;
+
+        case TaskUpdateType::SHUTDOWN:
+          ESP_LOGI(TAG, "Recieved shutdown request");
+          PowerFeather::Board.enterShutdownMode();
+          break;
+
         case TaskUpdateType::SUPPLY_MAINTAIN_VOLTAGE:
           ESP_LOGI(TAG, "Recieved supply maintain voltage value update: %d", update.data.u);
           powerfeather_mainboard->supply_maintain_voltage_ = static_cast<uint16_t>(update.data.u);
           PowerFeather::Board.setSupplyMaintainVoltage(powerfeather_mainboard->supply_maintain_voltage_);
           break;
 
-        case TaskUpdateType::POWERCYCLE:
-          ESP_LOGI(TAG, "Recieved powercycle request");
-          PowerFeather::Board.doPowerCycle();
+        case TaskUpdateType::BATTERY_CHARGING_MAX_CURRENT:
+          ESP_LOGI(TAG, "Recieved battery charging max current update: %d", update.data.u);
+          powerfeather_mainboard->battery_charging_max_current_ = static_cast<uint16_t>(update.data.u);
+          PowerFeather::Board.setSupplyMaintainVoltage(powerfeather_mainboard->battery_charging_max_current_);
           break;
 
         case TaskUpdateType::SENSORS:
@@ -170,29 +204,29 @@ namespace esphome
 
       if (battery_charging_max_current_value_)
       {
-        CHECK_RES(PowerFeather::Board.getCharger().getChargeCurrentLimit(battery_max_charging_current_));
-        battery_charging_max_current_value_->publish_state(battery_max_charging_current_);
+        CHECK_RES(PowerFeather::Board.getCharger().getChargeCurrentLimit(battery_charging_max_current_));
+        battery_charging_max_current_value_->publish_state(battery_charging_max_current_);
       }
 
       if (enable_battery_charging_switch_ && battery_capacity_)
       {
-        CHECK_RES(PowerFeather::Board.getCharger().getChargingEnabled(enable_charging_));
-        enable_battery_charging_switch_->publish_state(enable_charging_);
+        CHECK_RES(PowerFeather::Board.getCharger().getChargingEnabled(enable_battery_charging_));
+        enable_battery_charging_switch_->publish_state(enable_battery_charging_);
       }
 
       if (enable_battery_temp_sense_switch_)
       {
-        CHECK_RES(PowerFeather::Board.getCharger().getTSEnabled(enable_temp_sense_));
-        enable_battery_temp_sense_switch_->publish_state(enable_temp_sense_);
+        CHECK_RES(PowerFeather::Board.getCharger().getTSEnabled(enable_battery_temp_sense_));
+        enable_battery_temp_sense_switch_->publish_state(enable_battery_temp_sense_);
       }
 
       if (enable_battery_fuel_gauge_switch_ && battery_capacity_)
       {
         // Can fail here when no battery is actually connected, so do not check the result.
         // In that case, consider as not enabled. Initialize value before attempting to read.
-        enable_fuel_gauge_ = false;
-        PowerFeather::Board.getFuelGauge().getOperationMode(enable_fuel_gauge_);
-        enable_battery_fuel_gauge_switch_->publish_state(enable_fuel_gauge_);
+        enable_battery_fuel_gauge_ = false;
+        PowerFeather::Board.getFuelGauge().getOperationMode(enable_battery_fuel_gauge_);
+        enable_battery_fuel_gauge_switch_->publish_state(enable_battery_fuel_gauge_);
       }
 
       #undef CHECK_RES

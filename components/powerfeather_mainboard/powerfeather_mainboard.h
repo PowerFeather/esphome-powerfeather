@@ -121,10 +121,10 @@ namespace esphome
       bool enable_EN_;
       bool enable_3V3_;
       bool enable_VSQT_;
-      bool enable_charging_;
-      bool enable_temp_sense_;
-      bool enable_fuel_gauge_;
-      uint16_t battery_max_charging_current_;
+      bool enable_battery_charging_;
+      bool enable_battery_temp_sense_;
+      bool enable_battery_fuel_gauge_;
+      uint16_t battery_charging_max_current_;
       uint16_t supply_maintain_voltage_;
 
       QueueHandle_t update_task_queue_ = NULL;

@@ -27,7 +27,7 @@ async def to_code(config):
 
     # battery charging max current
     if CONF_BATTERY_CHARGING_MAX_CURRENT_VALUE in config:
-        val = await number.new_number(config[CONF_BATTERY_CHARGING_MAX_CURRENT_VALUE], min_value = 0.05, max_value = 2000, step = 0.01)
+        val = await number.new_number(config[CONF_BATTERY_CHARGING_MAX_CURRENT_VALUE], min_value = 0.05, max_value = 2, step = 0.01)
         await cg.register_parented(val, mainboard)
         cg.add(val.set_update_type(TASK_UPDATE_TYPES["BATTERY_CHARGING_MAX_CURRENT"]))
         cg.add(mainboard.set_battery_charging_max_current_value(val))
