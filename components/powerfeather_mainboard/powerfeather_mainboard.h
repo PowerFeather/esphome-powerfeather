@@ -86,7 +86,7 @@ namespace esphome
 
       void set_enable_3V3_switch(switch_::Switch *sw) { enable_3V3_switch_ = sw; }
       void set_enable_VSQT_switch(switch_::Switch *sw) { enable_VSQT_switch_ = sw; }
-      void set_enable_EN_switch(switch_::Switch *sw) { enable_EN_ = sw; }
+      void set_enable_EN_switch(switch_::Switch *sw) { enable_EN_switch_ = sw; }
       void set_enable_battery_charging_switch(switch_::Switch *sw) { enable_battery_charging_switch_ = sw; }
       void set_enable_battery_temp_sense_switch(switch_::Switch *sw) { enable_battery_temp_sense_switch_ = sw; }
       void set_enable_battery_fuel_gauge_switch(switch_::Switch *sw) { enable_battery_fuel_gauge_switch_ = sw; }
@@ -110,6 +110,7 @@ namespace esphome
 
       float supply_voltage_;
       float supply_current_;
+      bool supply_good_;
       float battery_voltage_;
       float battery_current_;
       uint8_t battery_charge_;
@@ -117,11 +118,12 @@ namespace esphome
       float battery_cycles_;
       float battery_time_left_;
       float battery_temperature_;
-      bool supply_good_;
       bool enable_EN_;
       bool enable_3V3_;
       bool enable_VSQT_;
       bool enable_charging_;
+      bool enable_temp_sense_;
+      bool enable_fuel_gauge_;
       uint16_t battery_max_charging_current_;
       uint16_t supply_maintain_voltage_;
 
@@ -129,6 +131,7 @@ namespace esphome
 
       sensor::Sensor *supply_voltage_sensor_;
       sensor::Sensor *supply_current_sensor_;
+      binary_sensor::BinarySensor *supply_good_sensor_;
       sensor::Sensor *battery_voltage_sensor_;
       sensor::Sensor *battery_current_sensor_;
       sensor::Sensor *battery_charge_sensor_;
@@ -136,7 +139,6 @@ namespace esphome
       sensor::Sensor *battery_cycles_sensor_;
       sensor::Sensor *battery_time_left_sensor_;
       sensor::Sensor *battery_temperature_sensor_;
-      binary_sensor::BinarySensor *supply_good_sensor_;
       switch_::Switch *enable_EN_switch_;
       switch_::Switch *enable_3V3_switch_;
       switch_::Switch *enable_VSQT_switch_;

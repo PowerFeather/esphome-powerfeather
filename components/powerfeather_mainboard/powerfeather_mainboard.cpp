@@ -101,53 +101,68 @@ namespace esphome
 
     void PowerFeatherMainboard::setup()
     {
-      #define CHECK_RES(res)      if ((res) != PowerFeather::Result::Ok) { mark_failed(); return; }
+      #define EXIT_SETUP()        { mark_failed(); ESP_LOGE(TAG, "Failed setup at line %d", __LINE__); return; }
+      #define CHECK_RES(res)      if ((res) != PowerFeather::Result::Ok) EXIT_SETUP();
 
       ESP_LOGI(TAG, "Initializing board, capacity: %d mV and type: %u", this->battery_capacity_, static_cast<uint32_t>(this->battery_type_));
       CHECK_RES(PowerFeather::Board.init(this->battery_capacity_, this->battery_type_));
 
       #undef CHECK_RES
-      #define CHECK_RES(res)      if (!(res)) { mark_failed(); return; }
+      #define CHECK_RES(res)      if (!(res)) EXIT_SETUP();
 
-      bool state = false;
 
       if (enable_3V3_switch_)
       {
         static constexpr gpio_num_t EN_3V3 = GPIO_NUM_4;
-        state = rtc_gpio_get_level(EN_3V3);
-        enable_3V3_switch_->publish_state(state);
+        enable_3V3_ = rtc_gpio_get_level(EN_3V3);
+        enable_3V3_switch_->publish_state(enable_3V3_);
       }
 
       if (enable_VSQT_switch_)
       {
         static constexpr gpio_num_t EN_VSQT = GPIO_NUM_14;
-        state = rtc_gpio_get_level(EN_VSQT);
-        enable_VSQT_switch_->publish_state(state);
+        enable_VSQT_ = rtc_gpio_get_level(EN_VSQT);
+        enable_VSQT_switch_->publish_state(enable_VSQT_);
       }
 
       if (enable_EN_switch_)
       {
         static constexpr gpio_num_t EN0 = GPIO_NUM_13;
-        state = rtc_gpio_get_level(EN0);
-        enable_EN_switch_->publish_state(state);
+        enable_EN_ = rtc_gpio_get_level(EN0);
+        enable_EN_switch_->publish_state(enable_EN_);
       }
 
-      if (enable_battery_charging_switch_)
+      if (battery_charging_max_current_value_)
       {
-        CHECK_RES(PowerFeather::Board.getCharger().getChargingEnabled(state));
-        enable_battery_charging_switch_->publish_state(state);
+        CHECK_RES(PowerFeather::Board.getCharger().getVINDPM(supply_maintain_voltage_));
+        battery_charging_max_current_value_->publish_state(supply_maintain_voltage_);
+      }
+
+      if (battery_charging_max_current_value_)
+      {
+        CHECK_RES(PowerFeather::Board.getCharger().getChargeCurrentLimit(battery_max_charging_current_));
+        battery_charging_max_current_value_->publish_state(battery_max_charging_current_);
+      }
+
+      if (enable_battery_charging_switch_ && battery_capacity_)
+      {
+        CHECK_RES(PowerFeather::Board.getCharger().getChargingEnabled(enable_charging_));
+        enable_battery_charging_switch_->publish_state(enable_charging_);
       }
 
       if (enable_battery_temp_sense_switch_)
       {
-        CHECK_RES(PowerFeather::Board.getCharger().getTSEnabled(state));
-        enable_battery_temp_sense_switch_->publish_state(state);
+        CHECK_RES(PowerFeather::Board.getCharger().getTSEnabled(enable_temp_sense_));
+        enable_battery_temp_sense_switch_->publish_state(enable_temp_sense_);
       }
 
-      if (enable_battery_fuel_gauge_switch_)
+      if (enable_battery_fuel_gauge_switch_ && battery_capacity_)
       {
-        CHECK_RES(PowerFeather::Board.getFuelGauge().getOperationMode(state));
-        enable_battery_fuel_gauge_switch_->publish_state(state);
+        // Can fail here when no battery is actually connected, so do not check the result.
+        // In that case, consider as not enabled. Initialize value before attempting to read.
+        enable_fuel_gauge_ = false;
+        PowerFeather::Board.getFuelGauge().getOperationMode(enable_fuel_gauge_);
+        enable_battery_fuel_gauge_switch_->publish_state(enable_fuel_gauge_);
       }
 
       #undef CHECK_RES
