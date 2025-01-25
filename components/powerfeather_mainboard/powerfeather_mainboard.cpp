@@ -101,28 +101,71 @@ namespace esphome
 
     void PowerFeatherMainboard::setup()
     {
-      ESP_LOGI(TAG, "Initializing board with capacity %d mV and type %u", this->battery_capacity_, static_cast<uint32_t>(this->battery_type_));
-      PowerFeather::Result res = PowerFeather::Board.init(this->battery_capacity_, this->battery_type_);
-      ESP_LOGI(TAG, "Initialization result: %d", static_cast<int>(res));
+      #define CHECK_RES(res)      if ((res) != PowerFeather::Result::Ok) { mark_failed(); return; }
 
-      // Get initial values
-      static constexpr gpio_num_t EN_3V3 = GPIO_NUM_4;   // 3V3 enable/disable
-      static constexpr gpio_num_t EN_VSQT = GPIO_NUM_14; // VSQT enable/disable
-      static constexpr gpio_num_t EN0 = GPIO_NUM_13;     // FeatherWings enable/disable (write)
+      ESP_LOGI(TAG, "Initializing board, capacity: %d mV and type: %u", this->battery_capacity_, static_cast<uint32_t>(this->battery_type_));
+      CHECK_RES(PowerFeather::Board.init(this->battery_capacity_, this->battery_type_));
 
-      enable_3V3_ = rtc_gpio_get_level(EN_3V3);
-      enable_VSQT_ = rtc_gpio_get_level(EN_VSQT);
-      enable_EN_ = rtc_gpio_get_level(EN0);
+      #undef CHECK_RES
+      #define CHECK_RES(res)      if (!(res)) { mark_failed(); return; }
 
-      bool enabled = false;
-      PowerFeather::Board.getCharger().getChargingEnabled(enabled);
+      bool state = false;
 
-      ESP_LOGI(TAG, "EN_3V3: %d,  EN_VSQT: %d,  EN: %d", enable_3V3_, enable_VSQT_, enable_EN_);
+      if (enable_3V3_switch_)
+      {
+        static constexpr gpio_num_t EN_3V3 = GPIO_NUM_4;
+        state = rtc_gpio_get_level(EN_3V3);
+        enable_3V3_switch_->publish_state(state);
+      }
 
-      enable_3V3_switch_->publish_state(enable_3V3_);
+      if (enable_VSQT_switch_)
+      {
+        static constexpr gpio_num_t EN_VSQT = GPIO_NUM_14;
+        state = rtc_gpio_get_level(EN_VSQT);
+        enable_VSQT_switch_->publish_state(state);
+      }
+
+      if (enable_EN_switch_)
+      {
+        static constexpr gpio_num_t EN0 = GPIO_NUM_13;
+        state = rtc_gpio_get_level(EN0);
+        enable_EN_switch_->publish_state(state);
+      }
+
+      if (enable_battery_charging_switch_)
+      {
+        CHECK_RES(PowerFeather::Board.getCharger().getChargingEnabled(state));
+        enable_battery_charging_switch_->publish_state(state);
+      }
+
+      if (enable_battery_temp_sense_switch_)
+      {
+        CHECK_RES(PowerFeather::Board.getCharger().getTSEnabled(state));
+        enable_battery_temp_sense_switch_->publish_state(state);
+      }
+
+      if (enable_battery_fuel_gauge_switch_)
+      {
+        CHECK_RES(PowerFeather::Board.getFuelGauge().getOperationMode(state));
+        enable_battery_fuel_gauge_switch_->publish_state(state);
+      }
+
+      #undef CHECK_RES
 
       update_task_queue_ = xQueueCreate(UPDATE_TASK_QUEUE_SIZE_, sizeof(TaskUpdate));
-      xTaskCreate(update_task_, "powerfeather_mainboard", UPDATE_TASK_STACK_SIZE_, this, uxTaskPriorityGet(NULL), NULL);
+      if (update_task_queue_ == NULL)
+      {
+        ESP_LOGE(TAG, "Failed to create PowerFeather task queue");
+        mark_failed();
+        return;
+      }
+
+      if (xTaskCreate(update_task_, "powerfeather_mainboard", UPDATE_TASK_STACK_SIZE_, this, uxTaskPriorityGet(NULL), NULL) != pdTRUE)
+      {
+        ESP_LOGE(TAG, "Failed to create PowerFeather task queue");
+        mark_failed();
+        return;
+      }
     }
 
     void PowerFeatherMainboard::update()

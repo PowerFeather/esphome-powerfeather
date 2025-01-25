@@ -9,7 +9,7 @@ namespace esphome
 {
   namespace powerfeather_mainboard
   {
-    class PowerFeatherValue : public number::Number, public Parented<PowerFeatherMainboard>, public Updateable
+    class PowerFeatherValue : public number::Number, public Parented<PowerFeatherMainboard>, public PowerFeatherUpdateable
     {
     public:
       PowerFeatherValue() = default;

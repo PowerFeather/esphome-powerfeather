@@ -46,10 +46,10 @@ namespace esphome
       } data;
     } TaskUpdate;
 
-    class Updateable
+    class PowerFeatherUpdateable
     {
     public:
-      Updateable() = default;
+      PowerFeatherUpdateable() = default;
       void set_update_type(TaskUpdateType type) { type_ = type; }
     protected:
       TaskUpdateType type_;
@@ -87,9 +87,9 @@ namespace esphome
       void set_enable_3V3_switch(switch_::Switch *sw) { enable_3V3_switch_ = sw; }
       void set_enable_VSQT_switch(switch_::Switch *sw) { enable_VSQT_switch_ = sw; }
       void set_enable_EN_switch(switch_::Switch *sw) { enable_EN_ = sw; }
-      void set_enable_battery_charging_switch(switch_::Switch *sw) { enable_battery_charging_ = sw; }
-      void set_enable_battery_temp_sense_switch(switch_::Switch *sw) { enable_battery_temp_sense_ = sw; }
-      void set_enable_battery_fuel_gauge_switch(switch_::Switch *sw) { enable_battery_fuel_gauge_ = sw; }
+      void set_enable_battery_charging_switch(switch_::Switch *sw) { enable_battery_charging_switch_ = sw; }
+      void set_enable_battery_temp_sense_switch(switch_::Switch *sw) { enable_battery_temp_sense_switch_ = sw; }
+      void set_enable_battery_fuel_gauge_switch(switch_::Switch *sw) { enable_battery_fuel_gauge_switch_ = sw; }
 
       void set_ship_mode_button(button::Button *button) { ship_mode_button_ = button; }
       void set_shutdown_button(button::Button *button) { shutdown_button_ = button; }
@@ -107,6 +107,7 @@ namespace esphome
 
       int32_t battery_capacity_;
       PowerFeather::Mainboard::BatteryType battery_type_;
+
       float supply_voltage_;
       float supply_current_;
       float battery_voltage_;
@@ -139,9 +140,9 @@ namespace esphome
       switch_::Switch *enable_EN_switch_;
       switch_::Switch *enable_3V3_switch_;
       switch_::Switch *enable_VSQT_switch_;
-      switch_::Switch *enable_battery_temp_sense_;
-      switch_::Switch *enable_battery_charging_;
-      switch_::Switch *enable_battery_fuel_gauge_;
+      switch_::Switch *enable_battery_temp_sense_switch_;
+      switch_::Switch *enable_battery_charging_switch_;
+      switch_::Switch *enable_battery_fuel_gauge_switch_;
       button::Button *ship_mode_button_;
       button::Button *shutdown_button_;
       button::Button *powercycle_button_;

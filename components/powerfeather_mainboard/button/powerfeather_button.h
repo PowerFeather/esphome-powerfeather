@@ -9,7 +9,7 @@ namespace esphome
 {
   namespace powerfeather_mainboard
   {
-    class PowerFeatherButton : public button::Button, public Parented<PowerFeatherMainboard>, public Updateable
+    class PowerFeatherButton : public button::Button, public Parented<PowerFeatherMainboard>, public PowerFeatherUpdateable
     {
     public:
       PowerFeatherButton() = default;

@@ -9,7 +9,7 @@ namespace esphome
 {
   namespace powerfeather_mainboard
   {
-    class PowerFeatherSwitch : public switch_::Switch, public Parented<PowerFeatherMainboard>, public Updateable
+    class PowerFeatherSwitch : public switch_::Switch, public Parented<PowerFeatherMainboard>, public PowerFeatherUpdateable
     {
     public:
       PowerFeatherSwitch() = default;
