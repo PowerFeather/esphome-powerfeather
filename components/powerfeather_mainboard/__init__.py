@@ -24,6 +24,7 @@ TASK_UPDATE_TYPES = {
     "ENABLE_BATTERY_TEMP_SENSE" : TaskUpdateType.ENABLE_BATTERY_TEMP_SENSE,
     "ENABLE_BATTERY_FUEL_GAUGE" : TaskUpdateType.ENABLE_BATTERY_FUEL_GAUGE,
     "ENABLE_BATTERY_CHARGING" : TaskUpdateType.ENABLE_BATTERY_CHARGING,
+    "ENABLE_STAT" : TaskUpdateType.ENABLE_STAT,
     "SHIP_MODE" : TaskUpdateType.SHIP_MODE,
     "SHUTDOWN" : TaskUpdateType.SHUTDOWN,
     "POWERCYCLE" : TaskUpdateType.POWERCYCLE,
@@ -53,7 +54,7 @@ async def to_code(config):
     mainboard = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(mainboard, config)
 
-    cg.add_library(name="PowerFeather-SDK", version="1.0.7", repository=os.environ["SDK_DIR"])
+    cg.add_library(name="PowerFeather-SDK", version="1.1.0", repository=os.environ["SDK_DIR"])
 
     if battery_capacity_config := config.get(CONF_BATTERY_CAPACITY):
         cg.add(mainboard.set_battery_capacity(battery_capacity_config))

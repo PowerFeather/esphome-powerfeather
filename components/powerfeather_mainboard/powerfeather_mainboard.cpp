@@ -57,6 +57,12 @@ namespace esphome
           PowerFeather::Board.enableBatteryCharging(powerfeather_mainboard->enable_battery_charging_);
           break;
 
+        case TaskUpdateType::ENABLE_STAT:
+          ESP_LOGI(TAG, "Recieved enable STAT LED: %d", update.data.b);
+          powerfeather_mainboard->enable_stat_ = update.data.b;
+          PowerFeather::Board.enableSTAT(powerfeather_mainboard->enable_stat_);
+          break;
+
         case TaskUpdateType::POWERCYCLE:
           ESP_LOGI(TAG, "Recieved powercycle request");
           PowerFeather::Board.doPowerCycle();
@@ -194,6 +200,12 @@ namespace esphome
         static constexpr gpio_num_t EN0 = GPIO_NUM_13;
         enable_EN_ = rtc_gpio_get_level(EN0);
         enable_EN_switch_->publish_state(enable_EN_);
+      }
+
+      if (enable_stat_switch_)
+      {
+        CHECK_RES(PowerFeather::Board.getCharger().getSTATEnabled(enable_stat_));
+        enable_stat_switch_->publish_state(enable_stat_);
       }
 
       if (battery_charging_max_current_value_)

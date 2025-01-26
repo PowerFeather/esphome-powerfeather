@@ -94,6 +94,8 @@ switch:
       name: "Enable Battery Charging"
     enable_battery_fuel_gauge:
       name: "Enable Battery Fuel Gauge"
+    enable_stat:
+      name: "Enable STAT LED"
 
 
 web_server:

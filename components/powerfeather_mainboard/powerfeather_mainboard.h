@@ -27,6 +27,7 @@ namespace esphome
       ENABLE_BATTERY_TEMP_SENSE,
       ENABLE_BATTERY_FUEL_GAUGE,
       ENABLE_BATTERY_CHARGING,
+      ENABLE_STAT,
       POWERCYCLE,
       SHIP_MODE,
       SHUTDOWN,
@@ -90,6 +91,7 @@ namespace esphome
       void set_enable_battery_charging_switch(switch_::Switch *sw) { enable_battery_charging_switch_ = sw; }
       void set_enable_battery_temp_sense_switch(switch_::Switch *sw) { enable_battery_temp_sense_switch_ = sw; }
       void set_enable_battery_fuel_gauge_switch(switch_::Switch *sw) { enable_battery_fuel_gauge_switch_ = sw; }
+      void set_enable_stat_switch(switch_::Switch *sw) { enable_stat_switch_ = sw; }
 
       void set_ship_mode_button(button::Button *button) { ship_mode_button_ = button; }
       void set_shutdown_button(button::Button *button) { shutdown_button_ = button; }
@@ -124,6 +126,7 @@ namespace esphome
       bool enable_battery_charging_;
       bool enable_battery_temp_sense_;
       bool enable_battery_fuel_gauge_;
+      bool enable_stat_;
       uint16_t battery_charging_max_current_;
       uint16_t supply_maintain_voltage_;
 
@@ -145,6 +148,7 @@ namespace esphome
       switch_::Switch *enable_battery_temp_sense_switch_;
       switch_::Switch *enable_battery_charging_switch_;
       switch_::Switch *enable_battery_fuel_gauge_switch_;
+      switch_::Switch *enable_stat_switch_;
       button::Button *ship_mode_button_;
       button::Button *shutdown_button_;
       button::Button *powercycle_button_;
