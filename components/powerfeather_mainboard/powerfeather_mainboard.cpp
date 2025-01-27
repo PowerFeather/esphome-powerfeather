@@ -87,7 +87,7 @@ namespace esphome
         case TaskUpdateType::BATTERY_CHARGING_MAX_CURRENT:
           ESP_LOGI(TAG, "Recieved battery charging max current update: %d", update.data.u);
           powerfeather_mainboard->battery_charging_max_current_ = static_cast<uint16_t>(update.data.u);
-          PowerFeather::Board.setSupplyMaintainVoltage(powerfeather_mainboard->battery_charging_max_current_);
+          PowerFeather::Board.setBatteryChargingMaxCurrent(powerfeather_mainboard->battery_charging_max_current_);
           break;
 
         case TaskUpdateType::SENSORS:
@@ -208,16 +208,16 @@ namespace esphome
         enable_stat_switch_->publish_state(enable_stat_);
       }
 
-      if (battery_charging_max_current_value_)
+      if (supply_maintain_voltage_value_)
       {
         CHECK_RES(PowerFeather::Board.getCharger().getVINDPM(supply_maintain_voltage_));
-        battery_charging_max_current_value_->publish_state(supply_maintain_voltage_);
+        supply_maintain_voltage_value_->publish_state(supply_maintain_voltage_ / 1000.0f);
       }
 
       if (battery_charging_max_current_value_)
       {
         CHECK_RES(PowerFeather::Board.getCharger().getChargeCurrentLimit(battery_charging_max_current_));
-        battery_charging_max_current_value_->publish_state(battery_charging_max_current_);
+        battery_charging_max_current_value_->publish_state(battery_charging_max_current_ / 1000.0f);
       }
 
       if (enable_battery_charging_switch_ && battery_capacity_)

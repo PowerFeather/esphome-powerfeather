@@ -20,14 +20,14 @@ async def to_code(config):
     
     # Values
     if CONF_SUPPLY_MAINTAIN_VOLTAGE_VALUE in config:
-        val = await number.new_number(config[CONF_SUPPLY_MAINTAIN_VOLTAGE_VALUE], min_value = 4.6, max_value = 16.8, step = 0.1)
+        val = await number.new_number(config[CONF_SUPPLY_MAINTAIN_VOLTAGE_VALUE], min_value = 4.6, max_value = 16.8, step = 0.12)
         await cg.register_parented(val, mainboard)
         cg.add(val.set_update_type(TASK_UPDATE_TYPES["SUPPLY_MAINTAIN_VOLTAGE"]))
         cg.add(mainboard.set_supply_maintain_voltage_value(val))
 
     # battery charging max current
     if CONF_BATTERY_CHARGING_MAX_CURRENT_VALUE in config:
-        val = await number.new_number(config[CONF_BATTERY_CHARGING_MAX_CURRENT_VALUE], min_value = 0.05, max_value = 2, step = 0.01)
+        val = await number.new_number(config[CONF_BATTERY_CHARGING_MAX_CURRENT_VALUE], min_value = 0.05, max_value = 2, step = 0.04)
         await cg.register_parented(val, mainboard)
         cg.add(val.set_update_type(TASK_UPDATE_TYPES["BATTERY_CHARGING_MAX_CURRENT"]))
         cg.add(mainboard.set_battery_charging_max_current_value(val))
