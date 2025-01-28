@@ -16,6 +16,8 @@ BATTERY_TYPES = {
     "Generic_3V7" : BatteryType.Generic_3V7
 }
 
+AUTO_LOAD = ["sensor", "binary_sensor", "switch", "button", "number"]
+
 TaskUpdateType = powerfeather_ns.enum("TaskUpdateType")
 TASK_UPDATE_TYPES = {
     "ENABLE_EN" : TaskUpdateType.ENABLE_EN,

@@ -36,3 +36,4 @@ async def to_code(config):
     #   - low voltage alarm
     #   - high voltage alarm
     #   - low charge alarm
+    #   - update fuel gauge temperature
