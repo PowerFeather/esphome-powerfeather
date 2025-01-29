@@ -7,6 +7,8 @@ AUTO_LOAD = ["sensor", "binary_sensor", "switch", "button", "number"]
 
 CONF_POWERFEATHER_MAINBOARD_ID = "powerfeather_mainboard_id"
 
+BATTERY_CAPACITY_MINIMUM = 50
+
 powerfeather_ns = cg.esphome_ns.namespace("powerfeather_mainboard")
 PowerFeatherMainboard = powerfeather_ns.class_(
     "PowerFeatherMainboard", cg.PollingComponent,
@@ -47,7 +49,10 @@ POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA = cv.Schema(
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(PowerFeatherMainboard),
-        cv.Optional(CONF_BATTERY_CAPACITY, default = 0): cv.positive_int,
+        cv.Optional(CONF_BATTERY_CAPACITY, default = 0): cv.Any(
+            cv.Range(min=BATTERY_CAPACITY_MINIMUM),
+            cv.Range(max=0)
+        ),
         cv.Optional(CONF_BATTERY_TYPE, "Generic_3V7"): cv.enum(BATTERY_TYPES),
     }
 ).extend(cv.polling_component_schema("1s"))
