@@ -65,5 +65,11 @@ async def to_code(config):
     if battery_type_config := config.get(CONF_BATTERY_TYPE):
         cg.add(mainboard.set_battery_type(battery_type_config))
 
+    # TODO
+    #   - Low voltage alarm
+    #   - High voltage alarm
+    #   - Low charge alarm
+    #   - Update fuel gauge temperature
+
 
 
