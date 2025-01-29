@@ -58,7 +58,7 @@ CONFIG_SCHEMA = POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA.extend(
 
 async def to_code(config):
     mainboard = await cg.get_variable(config[CONF_POWERFEATHER_MAINBOARD_ID])
-    # Sensors
+
     if supply_voltage_sensor_config := config.get(CONF_SUPPLY_VOLTAGE_SENSOR):
         sens = await sensor.new_sensor(supply_voltage_sensor_config)
         cg.add(mainboard.set_supply_voltage_sensor(sens))
