@@ -28,64 +28,64 @@ namespace esphome
           break;
 
         case TaskUpdateType::ENABLE_3V3:
-          ESP_LOGI(TAG, "Recieved EN enable state: %d", update.data.b);
+          ESP_LOGD(TAG, "Recieved EN enable state: %d", update.data.b);
           powerfeather_mainboard->enable_3V3_ = update.data.b;
           PowerFeather::Board.enable3V3(powerfeather_mainboard->enable_3V3_);
           break;
 
         case TaskUpdateType::ENABLE_VSQT:
-          ESP_LOGI(TAG, "Recieved VSQT enable state: %d", update.data.b);
+          ESP_LOGD(TAG, "Recieved VSQT enable state: %d", update.data.b);
           powerfeather_mainboard->enable_VSQT_ = update.data.b;
           PowerFeather::Board.enableVSQT(powerfeather_mainboard->enable_VSQT_);
           break;
 
         case TaskUpdateType::ENABLE_BATTERY_TEMP_SENSE:
-          ESP_LOGI(TAG, "Recieved enable battery temp sense: %d", update.data.b);
+          ESP_LOGD(TAG, "Recieved enable battery temp sense: %d", update.data.b);
           powerfeather_mainboard->enable_battery_temp_sense_ = update.data.b;
           PowerFeather::Board.enableBatteryTempSense(powerfeather_mainboard->enable_battery_temp_sense_);
           break;
 
         case TaskUpdateType::ENABLE_BATTERY_FUEL_GAUGE:
-          ESP_LOGI(TAG, "Recieved enable battery fuel gauge: %d", update.data.b);
+          ESP_LOGD(TAG, "Recieved enable battery fuel gauge: %d", update.data.b);
           powerfeather_mainboard->enable_battery_fuel_gauge_ = update.data.b;
           PowerFeather::Board.enableBatteryFuelGauge(powerfeather_mainboard->enable_battery_fuel_gauge_);
           break;
 
         case TaskUpdateType::ENABLE_BATTERY_CHARGING:
-          ESP_LOGI(TAG, "Recieved enable battery charging: %d", update.data.b);
+          ESP_LOGD(TAG, "Recieved enable battery charging: %d", update.data.b);
           powerfeather_mainboard->enable_battery_charging_ = update.data.b;
           PowerFeather::Board.enableBatteryCharging(powerfeather_mainboard->enable_battery_charging_);
           break;
 
         case TaskUpdateType::ENABLE_STAT:
-          ESP_LOGI(TAG, "Recieved enable STAT LED: %d", update.data.b);
+          ESP_LOGD(TAG, "Recieved enable STAT LED: %d", update.data.b);
           powerfeather_mainboard->enable_stat_ = update.data.b;
           PowerFeather::Board.enableSTAT(powerfeather_mainboard->enable_stat_);
           break;
 
         case TaskUpdateType::POWERCYCLE:
-          ESP_LOGI(TAG, "Recieved powercycle request");
+          ESP_LOGD(TAG, "Recieved powercycle request");
           PowerFeather::Board.doPowerCycle();
           break;
 
         case TaskUpdateType::SHIP_MODE:
-          ESP_LOGI(TAG, "Recieved ship mode request");
+          ESP_LOGD(TAG, "Recieved ship mode request");
           PowerFeather::Board.enterShipMode();
           break;
 
         case TaskUpdateType::SHUTDOWN:
-          ESP_LOGI(TAG, "Recieved shutdown request");
+          ESP_LOGD(TAG, "Recieved shutdown request");
           PowerFeather::Board.enterShutdownMode();
           break;
 
         case TaskUpdateType::SUPPLY_MAINTAIN_VOLTAGE:
-          ESP_LOGI(TAG, "Recieved supply maintain voltage value update: %f", update.data.f);
+          ESP_LOGD(TAG, "Recieved supply maintain voltage value update: %f", update.data.f);
           powerfeather_mainboard->supply_maintain_voltage_ = update.data.f * 1000.f;
           PowerFeather::Board.setSupplyMaintainVoltage(static_cast<uint16_t>(powerfeather_mainboard->supply_maintain_voltage_));
           break;
 
         case TaskUpdateType::BATTERY_CHARGING_MAX_CURRENT:
-          ESP_LOGI(TAG, "Recieved battery charging max current update: %f", update.data.f);
+          ESP_LOGD(TAG, "Recieved battery charging max current update: %f", update.data.f);
           powerfeather_mainboard->battery_charging_max_current_ = update.data.f * 1000.0f;
           PowerFeather::Board.setBatteryChargingMaxCurrent(static_cast<uint16_t>(powerfeather_mainboard->battery_charging_max_current_));
           break;
@@ -93,7 +93,7 @@ namespace esphome
         case TaskUpdateType::SENSORS:
         default:
         {
-          ESP_LOGI(TAG, "Recieved sensors update request");
+          ESP_LOGD(TAG, "Recieved sensors update request");
           if (powerfeather_mainboard->supply_voltage_sensor_ != nullptr)
           {
             uint16_t supply_voltage = 0;
@@ -174,7 +174,7 @@ namespace esphome
       #define EXIT_SETUP()        { mark_failed(); ESP_LOGE(TAG, "Failed setup at line %d", __LINE__); return; }
       #define CHECK_RES(res)      if ((res) != PowerFeather::Result::Ok) EXIT_SETUP();
 
-      ESP_LOGI(TAG, "Initializing board, capacity: %d mV and type: %u", this->battery_capacity_, static_cast<uint32_t>(this->battery_type_));
+      ESP_LOGD(TAG, "Initializing board, capacity: %d mV and type: %u", this->battery_capacity_, static_cast<uint32_t>(this->battery_type_));
       CHECK_RES(PowerFeather::Board.init(this->battery_capacity_, this->battery_type_));
 
       #undef CHECK_RES
