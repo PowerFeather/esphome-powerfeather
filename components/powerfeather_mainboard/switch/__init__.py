@@ -1,7 +1,14 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import switch
+from esphome.const import (
+    DEVICE_CLASS_SWITCH,
+    ICON_THERMOMETER,
+    ICON_GAUGE,
+)
 from .. import (
+    ICON_LED_ON,
+    ICON_ENERGY,
     CONF_POWERFEATHER_MAINBOARD_ID,
     POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA,
     TASK_UPDATE_TYPES,
@@ -20,13 +27,40 @@ PowerFeatherSwitch = powerfeather_ns.class_("PowerFeatherSwitch", switch.Switch,
 
 CONFIG_SCHEMA = POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA.extend(
     {
-        cv.Optional(CONF_ENABLE_EN_SWITCH): switch.switch_schema(PowerFeatherSwitch),
-        cv.Optional(CONF_ENABLE_3V3_SWITCH): switch.switch_schema(PowerFeatherSwitch),
-        cv.Optional(CONF_ENABLE_VSQT_SWITCH): switch.switch_schema(PowerFeatherSwitch),
-        cv.Optional(CONF_ENABLE_BATTERY_TEMP_SENSE_SWITCH): switch.switch_schema(PowerFeatherSwitch),
-        cv.Optional(CONF_ENABLE_BATTERY_CHARGING_SWITCH): switch.switch_schema(PowerFeatherSwitch),
-        cv.Optional(CONF_ENABLE_BATTERY_FUEL_GAUGE_SWITCH): switch.switch_schema(PowerFeatherSwitch),
-        cv.Optional(CONF_ENABLE_STAT_SWITCH): switch.switch_schema(PowerFeatherSwitch),
+        cv.Optional(CONF_ENABLE_EN_SWITCH): switch.switch_schema(
+            PowerFeatherSwitch,
+            device_class=DEVICE_CLASS_SWITCH,
+        ),
+        cv.Optional(CONF_ENABLE_3V3_SWITCH): switch.switch_schema(
+            PowerFeatherSwitch,
+            icon=ICON_ENERGY,
+            device_class=DEVICE_CLASS_SWITCH,
+        ),
+        cv.Optional(CONF_ENABLE_VSQT_SWITCH): switch.switch_schema(
+            PowerFeatherSwitch,
+            icon=ICON_ENERGY,
+            device_class=DEVICE_CLASS_SWITCH,
+        ),
+        cv.Optional(CONF_ENABLE_BATTERY_TEMP_SENSE_SWITCH): switch.switch_schema(
+            PowerFeatherSwitch,
+            icon=ICON_THERMOMETER,
+            device_class=DEVICE_CLASS_SWITCH,
+        ),
+        cv.Optional(CONF_ENABLE_BATTERY_CHARGING_SWITCH): switch.switch_schema(
+            PowerFeatherSwitch,
+            icon=ICON_ENERGY,
+            device_class=DEVICE_CLASS_SWITCH,
+        ),
+        cv.Optional(CONF_ENABLE_BATTERY_FUEL_GAUGE_SWITCH): switch.switch_schema(
+            PowerFeatherSwitch,
+            icon=ICON_GAUGE,
+            device_class=DEVICE_CLASS_SWITCH,
+        ),
+        cv.Optional(CONF_ENABLE_STAT_SWITCH): switch.switch_schema(
+            PowerFeatherSwitch,
+            icon=ICON_LED_ON,
+            device_class=DEVICE_CLASS_SWITCH,
+        ),
     }
 )
 

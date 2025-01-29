@@ -5,6 +5,7 @@ from esphome.const import CONF_ID
 ICON_CURRENT_DC = "mdi:current-dc"
 ICON_VOLTAGE = "mdi:sine-wave"
 ICON_ENERGY = "mdi:lightning-bolt"
+ICON_LED_ON = "mdi:led-on"
 
 CODEOWNERS = ["powerfeatherdev (dev@powerfeather.dev)"]
 AUTO_LOAD = ["sensor", "binary_sensor", "switch", "button", "number"]

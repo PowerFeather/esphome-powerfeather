@@ -3,9 +3,13 @@ import esphome.config_validation as cv
 from esphome.components import number
 from esphome.const import (
     UNIT_AMPERE,
-    UNIT_VOLT
+    UNIT_VOLT,
+    DEVICE_CLASS_VOLTAGE,
+    DEVICE_CLASS_CURRENT,
 )
 from .. import (
+    ICON_VOLTAGE,
+    ICON_CURRENT_DC,
     CONF_POWERFEATHER_MAINBOARD_ID,
     POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA,
     TASK_UPDATE_TYPES,
@@ -29,10 +33,16 @@ CONFIG_SCHEMA = POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA.extend(
     {
         cv.Optional(CONF_SUPPLY_MAINTAIN_VOLTAGE_VALUE): number.number_schema(
             PowerFeatherValue,
-            unit_of_measurement = UNIT_AMPERE),
+            icon=ICON_VOLTAGE,
+            unit_of_measurement=UNIT_VOLT,
+            device_class=DEVICE_CLASS_VOLTAGE
+        ),
         cv.Optional(CONF_BATTERY_CHARGING_MAX_CURRENT_VALUE): number.number_schema(
             PowerFeatherValue,
-            unit_of_measurement = UNIT_VOLT),
+            icon=ICON_CURRENT_DC,
+            unit_of_measurement=UNIT_AMPERE,
+            device_class=DEVICE_CLASS_CURRENT
+        ),
     })
 
 async def to_code(config):

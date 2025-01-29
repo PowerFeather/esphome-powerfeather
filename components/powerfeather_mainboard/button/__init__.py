@@ -2,6 +2,11 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import button
+from esphome.const import(
+    ICON_RESTART,
+    DEVICE_CLASS_RESTART,
+
+)
 from .. import (
     CONF_POWERFEATHER_MAINBOARD_ID,
     POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA,
@@ -19,7 +24,11 @@ CONFIG_SCHEMA = POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA.extend(
     {
         cv.Optional(CONF_SHIP_MODE_BUTTON): button.button_schema(PowerFeatherButton),
         cv.Optional(CONF_SHUTDOWN_BUTTON): button.button_schema(PowerFeatherButton),
-        cv.Optional(CONF_POWER_CYCLE_BUTTON): button.button_schema(PowerFeatherButton),
+        cv.Optional(CONF_POWER_CYCLE_BUTTON): button.button_schema(
+            PowerFeatherButton,
+            icon=ICON_RESTART,
+            device_class=DEVICE_CLASS_RESTART,
+        ),
     }
 )
 
