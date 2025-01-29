@@ -15,7 +15,9 @@ namespace esphome
   {
     enum BatteryType
     {
-      Generic_3V7
+      Generic_3V7,
+      ICR18650_26H,
+      UR18650ZY,
     };
 
    enum TaskUpdateType
@@ -68,6 +70,12 @@ namespace esphome
       {
         switch (battery_type)
         {
+        case ICR18650_26H:
+          battery_type_ = PowerFeather::Mainboard::BatteryType::ICR18650_26H;
+          break;
+        case UR18650ZY:
+          battery_type_ = PowerFeather::Mainboard::BatteryType::UR18650ZY;
+          break;
         case Generic_3V7:
         default:
           battery_type_ = PowerFeather::Mainboard::BatteryType::Generic_3V7;
