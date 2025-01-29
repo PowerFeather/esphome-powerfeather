@@ -110,16 +110,7 @@ namespace esphome
       int32_t battery_capacity_;
       PowerFeather::Mainboard::BatteryType battery_type_;
 
-      float supply_voltage_;
-      float supply_current_;
       bool supply_good_;
-      float battery_voltage_;
-      float battery_current_;
-      uint8_t battery_charge_;
-      float battery_health_;
-      float battery_cycles_;
-      float battery_time_left_;
-      float battery_temperature_;
       bool enable_EN_;
       bool enable_3V3_;
       bool enable_VSQT_;
@@ -127,21 +118,20 @@ namespace esphome
       bool enable_battery_temp_sense_;
       bool enable_battery_fuel_gauge_;
       bool enable_stat_;
-      uint16_t battery_charging_max_current_;
-      uint16_t supply_maintain_voltage_;
+      float supply_voltage_;
+      float supply_current_;
+      float battery_voltage_;
+      float battery_current_;
+      float battery_charge_;
+      float battery_health_;
+      float battery_cycles_;
+      float battery_time_left_;
+      float battery_temperature_;
+      float battery_charging_max_current_;
+      float supply_maintain_voltage_;
 
       QueueHandle_t update_task_queue_ = NULL;
 
-      sensor::Sensor *supply_voltage_sensor_;
-      sensor::Sensor *supply_current_sensor_;
-      binary_sensor::BinarySensor *supply_good_sensor_;
-      sensor::Sensor *battery_voltage_sensor_;
-      sensor::Sensor *battery_current_sensor_;
-      sensor::Sensor *battery_charge_sensor_;
-      sensor::Sensor *battery_health_sensor_;
-      sensor::Sensor *battery_cycles_sensor_;
-      sensor::Sensor *battery_time_left_sensor_;
-      sensor::Sensor *battery_temperature_sensor_;
       switch_::Switch *enable_EN_switch_;
       switch_::Switch *enable_3V3_switch_;
       switch_::Switch *enable_VSQT_switch_;
@@ -149,6 +139,16 @@ namespace esphome
       switch_::Switch *enable_battery_charging_switch_;
       switch_::Switch *enable_battery_fuel_gauge_switch_;
       switch_::Switch *enable_stat_switch_;
+      binary_sensor::BinarySensor *supply_good_sensor_;
+      sensor::Sensor *supply_voltage_sensor_;
+      sensor::Sensor *supply_current_sensor_;
+      sensor::Sensor *battery_voltage_sensor_;
+      sensor::Sensor *battery_current_sensor_;
+      sensor::Sensor *battery_charge_sensor_;
+      sensor::Sensor *battery_health_sensor_;
+      sensor::Sensor *battery_cycles_sensor_;
+      sensor::Sensor *battery_time_left_sensor_;
+      sensor::Sensor *battery_temperature_sensor_;
       button::Button *ship_mode_button_;
       button::Button *shutdown_button_;
       button::Button *powercycle_button_;

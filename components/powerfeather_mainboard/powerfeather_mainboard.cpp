@@ -79,15 +79,15 @@ namespace esphome
           break;
 
         case TaskUpdateType::SUPPLY_MAINTAIN_VOLTAGE:
-          ESP_LOGI(TAG, "Recieved supply maintain voltage value update: %d", update.data.u);
-          powerfeather_mainboard->supply_maintain_voltage_ = static_cast<uint16_t>(update.data.u);
-          PowerFeather::Board.setSupplyMaintainVoltage(powerfeather_mainboard->supply_maintain_voltage_);
+          ESP_LOGI(TAG, "Recieved supply maintain voltage value update: %f", update.data.f);
+          powerfeather_mainboard->supply_maintain_voltage_ = update.data.f * 1000.f;
+          PowerFeather::Board.setSupplyMaintainVoltage(static_cast<uint16_t>(powerfeather_mainboard->supply_maintain_voltage_));
           break;
 
         case TaskUpdateType::BATTERY_CHARGING_MAX_CURRENT:
-          ESP_LOGI(TAG, "Recieved battery charging max current update: %d", update.data.u);
-          powerfeather_mainboard->battery_charging_max_current_ = static_cast<uint16_t>(update.data.u);
-          PowerFeather::Board.setBatteryChargingMaxCurrent(powerfeather_mainboard->battery_charging_max_current_);
+          ESP_LOGI(TAG, "Recieved battery charging max current update: %f", update.data.f);
+          powerfeather_mainboard->battery_charging_max_current_ = update.data.f * 1000.0f;
+          PowerFeather::Board.setBatteryChargingMaxCurrent(static_cast<uint16_t>(powerfeather_mainboard->battery_charging_max_current_));
           break;
 
         case TaskUpdateType::SENSORS:
@@ -154,7 +154,7 @@ namespace esphome
           {
             int battery_time_left = 0;
             PowerFeather::Board.getBatteryTimeLeft(battery_time_left);
-            powerfeather_mainboard->battery_time_left_ = battery_time_left;
+            powerfeather_mainboard->battery_time_left_ = battery_time_left / 60.0f;
           }
 
           if (powerfeather_mainboard->battery_temperature_sensor_ != nullptr)
@@ -210,14 +210,18 @@ namespace esphome
 
       if (supply_maintain_voltage_value_)
       {
-        CHECK_RES(PowerFeather::Board.getCharger().getVINDPM(supply_maintain_voltage_));
-        supply_maintain_voltage_value_->publish_state(supply_maintain_voltage_ / 1000.0f);
+        uint16_t value = 0;
+        CHECK_RES(PowerFeather::Board.getCharger().getVINDPM(value));
+        supply_maintain_voltage_ = value / 1000.0f;
+        supply_maintain_voltage_value_->publish_state(supply_maintain_voltage_);
       }
 
       if (battery_charging_max_current_value_)
       {
-        CHECK_RES(PowerFeather::Board.getCharger().getChargeCurrentLimit(battery_charging_max_current_));
-        battery_charging_max_current_value_->publish_state(battery_charging_max_current_ / 1000.0f);
+        uint16_t value = 0;
+        CHECK_RES(PowerFeather::Board.getCharger().getChargeCurrentLimit(value));
+        battery_charging_max_current_ = value / 1000.0f;
+        battery_charging_max_current_value_->publish_state(battery_charging_max_current_);
       }
 
       if (enable_battery_charging_switch_ && battery_capacity_)

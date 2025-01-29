@@ -19,7 +19,7 @@ namespace esphome
       {
         TaskUpdate update;
         update.type = type_;
-        update.data.u = value * 1000.0f;
+        update.data.f = value;
         this->parent_->send_task_update(update);
         this->publish_state(value);
       }
