@@ -1,8 +1,12 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import switch
-from .. import CONF_POWERFEATHER_MAINBOARD_ID, POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA, TASK_UPDATE_TYPES, powerfeather_ns
-
+from .. import (
+    CONF_POWERFEATHER_MAINBOARD_ID,
+    POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA,
+    TASK_UPDATE_TYPES,
+    powerfeather_ns
+)
 
 CONF_ENABLE_EN_SWITCH = "enable_EN"
 CONF_ENABLE_3V3_SWITCH = "enable_3V3"
@@ -29,7 +33,6 @@ CONFIG_SCHEMA = POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA.extend(
 async def to_code(config):
     mainboard = await cg.get_variable(config[CONF_POWERFEATHER_MAINBOARD_ID])
 
-    # Switches
     if CONF_ENABLE_EN_SWITCH in config:
         sw = await switch.new_switch(config[CONF_ENABLE_EN_SWITCH])
         await cg.register_parented(sw, mainboard)
@@ -65,7 +68,7 @@ async def to_code(config):
         await cg.register_parented(sw, mainboard)
         cg.add(sw.set_update_type(TASK_UPDATE_TYPES["ENABLE_BATTERY_FUEL_GAUGE"]))
         cg.add(mainboard.set_enable_battery_fuel_gauge_switch(sw))
-        
+
     if CONF_ENABLE_STAT_SWITCH in config:
         sw = await switch.new_switch(config[CONF_ENABLE_STAT_SWITCH])
         await cg.register_parented(sw, mainboard)

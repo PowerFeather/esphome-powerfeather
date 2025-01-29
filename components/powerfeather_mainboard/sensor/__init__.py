@@ -1,9 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import sensor
-
 from esphome.const import (
-    CONF_ID,
     ICON_EMPTY,
     UNIT_VOLT,
     UNIT_AMPERE,
@@ -12,7 +10,10 @@ from esphome.const import (
     UNIT_HOUR,
     UNIT_CELSIUS
 )
-from .. import CONF_POWERFEATHER_MAINBOARD_ID, POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA, TASK_UPDATE_TYPES, powerfeather_ns
+from .. import (
+    CONF_POWERFEATHER_MAINBOARD_ID,
+    POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA,
+)
 
 CONF_SUPPLY_VOLTAGE_SENSOR = "supply_voltage"
 CONF_SUPPLY_CURRENT_SENSOR = "supply_current"

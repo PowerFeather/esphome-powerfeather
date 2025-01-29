@@ -2,13 +2,16 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import button
-from .. import CONF_POWERFEATHER_MAINBOARD_ID, POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA, TASK_UPDATE_TYPES, powerfeather_ns, PowerFeatherMainboard
-
+from .. import (
+    CONF_POWERFEATHER_MAINBOARD_ID,
+    POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA,
+    TASK_UPDATE_TYPES,
+    powerfeather_ns,
+)
 
 CONF_SHIP_MODE_BUTTON = "ship_mode"
 CONF_SHUTDOWN_BUTTON = "shutdown"
 CONF_POWER_CYCLE_BUTTON = "powercycle"
-
 
 PowerFeatherButton = powerfeather_ns.class_("PowerFeatherButton", button.Button, cg.Component)
 
@@ -23,7 +26,6 @@ CONFIG_SCHEMA = POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA.extend(
 async def to_code(config):
     mainboard = await cg.get_variable(config[CONF_POWERFEATHER_MAINBOARD_ID])
 
-    # Button
     if CONF_SHIP_MODE_BUTTON in config:
         btn = await button.new_button(config[CONF_SHIP_MODE_BUTTON])
         await cg.register_parented(btn, mainboard)
