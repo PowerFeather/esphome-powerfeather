@@ -7,13 +7,13 @@ AUTO_LOAD = ["sensor", "binary_sensor", "switch", "button", "number"]
 
 CONF_POWERFEATHER_MAINBOARD_ID = "powerfeather_mainboard_id"
 
-BATTERY_CAPACITY_MINIMUM = 50
-
 powerfeather_ns = cg.esphome_ns.namespace("powerfeather_mainboard")
 PowerFeatherMainboard = powerfeather_ns.class_(
     "PowerFeatherMainboard", cg.PollingComponent,
 )
 
+# Definitions from SDK, needs to be duplicated here
+BATTERY_CAPACITY_MINIMUM = 50
 BatteryType = powerfeather_ns.enum("BatteryType")
 BATTERY_TYPES = {
     "Generic_3V7" : BatteryType.Generic_3V7,

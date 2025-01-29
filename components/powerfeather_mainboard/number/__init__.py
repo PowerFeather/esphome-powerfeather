@@ -12,6 +12,14 @@ from .. import (
     powerfeather_ns
 )
 
+# Definitions from SDK, needs to be duplicated here
+SUPPLY_MAINTAIN_VOLTAGE_MIN = 4.6
+SUPPLY_MAINTAIN_VOLTAGE_MAX = 16.8
+SUPPLY_MAINTAIN_VOLTAGE_STEP = 0.12
+BATTERY_CHARGING_CURRENT_MIN = 0.05
+BATTERY_CHARGING_CURRENT_MAX = 2
+BATTERY_CHARGING_CURRENT_STEP = 0.04
+
 CONF_SUPPLY_MAINTAIN_VOLTAGE_VALUE = "supply_maintain_voltage"
 CONF_BATTERY_CHARGING_MAX_CURRENT_VALUE = "battery_charging_max_current"
 
@@ -31,13 +39,21 @@ async def to_code(config):
     mainboard = await cg.get_variable(config[CONF_POWERFEATHER_MAINBOARD_ID])
 
     if CONF_SUPPLY_MAINTAIN_VOLTAGE_VALUE in config:
-        val = await number.new_number(config[CONF_SUPPLY_MAINTAIN_VOLTAGE_VALUE], min_value = 4.6, max_value = 16.8, step = 0.12)
+        val = await number.new_number(config[CONF_SUPPLY_MAINTAIN_VOLTAGE_VALUE],
+                min_value = SUPPLY_MAINTAIN_VOLTAGE_MIN,
+                max_value = SUPPLY_MAINTAIN_VOLTAGE_MAX,
+                step = SUPPLY_MAINTAIN_VOLTAGE_STEP
+                )
         await cg.register_parented(val, mainboard)
         cg.add(val.set_update_type(TASK_UPDATE_TYPES["SUPPLY_MAINTAIN_VOLTAGE"]))
         cg.add(mainboard.set_supply_maintain_voltage_value(val))
 
     if CONF_BATTERY_CHARGING_MAX_CURRENT_VALUE in config:
-        val = await number.new_number(config[CONF_BATTERY_CHARGING_MAX_CURRENT_VALUE], min_value = 0.05, max_value = 2, step = 0.04)
+        val = await number.new_number(config[CONF_BATTERY_CHARGING_MAX_CURRENT_VALUE],
+                min_value = BATTERY_CHARGING_CURRENT_MIN,
+                max_value = BATTERY_CHARGING_CURRENT_MAX,
+                step = BATTERY_CHARGING_CURRENT_STEP
+                )
         await cg.register_parented(val, mainboard)
         cg.add(val.set_update_type(TASK_UPDATE_TYPES["BATTERY_CHARGING_MAX_CURRENT"]))
         cg.add(mainboard.set_battery_charging_max_current_value(val))
