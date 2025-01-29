@@ -33,10 +33,10 @@ CONFIG_SCHEMA = POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA.extend(
             unit_of_measurement=UNIT_AMPERE, icon=ICON_EMPTY, accuracy_decimals=2
         ),
         cv.Optional(CONF_BATTERY_VOLTAGE_SENSOR): sensor.sensor_schema(
-            unit_of_measurement=UNIT_VOLT, icon=ICON_EMPTY, accuracy_decimals=3
+            unit_of_measurement=UNIT_VOLT, icon=ICON_EMPTY, accuracy_decimals=2
         ),
         cv.Optional(CONF_BATTERY_CURRENT_SENSOR): sensor.sensor_schema(
-            unit_of_measurement=UNIT_VOLT, icon=ICON_EMPTY, accuracy_decimals=3
+            unit_of_measurement=UNIT_AMPERE, icon=ICON_EMPTY, accuracy_decimals=2
         ),
         cv.Optional(CONF_BATTERY_CHARGE_SENSOR): sensor.sensor_schema(
             unit_of_measurement=UNIT_PERCENT, icon=ICON_EMPTY
