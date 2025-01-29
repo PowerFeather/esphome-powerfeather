@@ -2,6 +2,10 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.const import CONF_ID
 
+ICON_CURRENT_DC = "mdi:current-dc"
+ICON_VOLTAGE = "mdi:sine-wave"
+ICON_ENERGY = "mdi:lightning-bolt"
+
 CODEOWNERS = ["powerfeatherdev (dev@powerfeather.dev)"]
 AUTO_LOAD = ["sensor", "binary_sensor", "switch", "button", "number"]
 
