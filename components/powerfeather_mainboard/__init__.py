@@ -4,6 +4,9 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.const import CONF_ID
 
+CODEOWNERS = ["powerfeatherdev (dev@powerfeather.dev)"]
+AUTO_LOAD = ["sensor", "binary_sensor", "switch", "button", "number"]
+
 CONF_POWERFEATHER_MAINBOARD_ID = "powerfeather_mainboard_id"
 
 powerfeather_ns = cg.esphome_ns.namespace("powerfeather_mainboard")
@@ -16,7 +19,6 @@ BATTERY_TYPES = {
     "Generic_3V7" : BatteryType.Generic_3V7
 }
 
-AUTO_LOAD = ["sensor", "binary_sensor", "switch", "button", "number"]
 
 TaskUpdateType = powerfeather_ns.enum("TaskUpdateType")
 TASK_UPDATE_TYPES = {
