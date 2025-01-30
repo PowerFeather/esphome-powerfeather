@@ -167,7 +167,8 @@ namespace esphome
       static void update_task_(void *param);
       void update_sensors_();
 
-      uint32_t last_update_time_ = 0;
+      uint32_t sensors_publish_time_ = 0;
+      bool sensors_updated_ = false;
     };
   } // namespace empty_compound_sensor
 } // namespace esphome

@@ -34,6 +34,7 @@ powerfeather_mainboard:
   battery_capacity: 1000
   battery_type: "Generic_3V7"
   id: "my_powerfeather"
+  update_interval: 5s # applies to all types of sensor under this component
 
 sensor:
   - platform: "powerfeather_mainboard"

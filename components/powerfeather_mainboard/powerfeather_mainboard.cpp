@@ -4,12 +4,18 @@
 
 #include "freertos/task.h"
 #include "freertos/queue.h"
+#include "esp_timer.h"
 
 namespace esphome
 {
   namespace powerfeather_mainboard
   {
     static const char *TAG = "powerfeather_mainboard";
+
+    static uint32_t millis()
+    {
+      return esp_timer_get_time() / 1000;
+    }
 
     void PowerFeatherMainboard::update_sensors_()
     {
@@ -272,21 +278,22 @@ namespace esphome
 
     void PowerFeatherMainboard::loop()
     {
-      uint32_t now = xTaskGetTickCount();
+      uint32_t now = millis();
       // Do sensors update before an anticipated read
-      if (last_update_time_ == 0 || (now - last_update_time_) >= (this->update_interval_ - UPDATE_TASK_SENSOR_UPDATE_MS_))
+      if (!sensors_updated_ && now >= ((sensors_publish_time_ + update_interval_) - UPDATE_TASK_SENSOR_UPDATE_MS_))
       {
-        ESP_LOGD(TAG, "Updating sensor values %d", xTaskGetTickCount());
+        ESP_LOGD(TAG, "Updating sensor values t=%u ms", now);
         TaskUpdate update;
         update.type = TaskUpdateType::SENSORS;
         send_task_update(update);
-        last_update_time_ = now;
+        sensors_updated_ = true;
       }
     }
 
     void PowerFeatherMainboard::update()
     {
-      ESP_LOGD(TAG, "Publishing sensor values %d", xTaskGetTickCount());
+      uint32_t now = millis();
+      ESP_LOGD(TAG, "Publishing sensor values t=%u ms", now);
       if (this->supply_voltage_sensor_ != nullptr)
       {
         this->supply_voltage_sensor_->publish_state(this->supply_voltage_);
@@ -327,6 +334,8 @@ namespace esphome
       {
         this->battery_temperature_sensor_->publish_state(this->battery_temperature_);
       }
+      sensors_publish_time_ = now;
+      sensors_updated_ = false;
     }
 
     void PowerFeatherMainboard::dump_config()
