@@ -29,6 +29,7 @@ external_components:
   - source:
       type: local
       path: ../components
+    refresh: 0s
 
 powerfeather_mainboard:
   battery_capacity: 1000
