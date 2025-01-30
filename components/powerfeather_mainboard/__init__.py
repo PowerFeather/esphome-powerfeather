@@ -13,7 +13,7 @@ UNIT_MINUTES = "min"
 CODEOWNERS = ["powerfeatherdev (dev@powerfeather.dev)"]
 AUTO_LOAD = ["sensor", "binary_sensor", "switch", "button", "number"]
 
-CONF_POWERFEATHER_MAINBOARD_ID = "powerfeather_mainboard_id"
+CONF_POWERFEATHER_MAINBOARD_ID = "mainboard_id"
 
 powerfeather_ns = cg.esphome_ns.namespace("powerfeather_mainboard")
 PowerFeatherMainboard = powerfeather_ns.class_(

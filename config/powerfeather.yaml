@@ -39,7 +39,7 @@ powerfeather_mainboard:
 
 sensor:
   - platform: "powerfeather_mainboard"
-    powerfeather_mainboard_id: "my_powerfeather"
+    mainboard_id: "my_powerfeather"
     supply_voltage:
       name: "Supply Voltage"
     supply_current:
@@ -61,13 +61,13 @@ sensor:
 
 binary_sensor:
   - platform: "powerfeather_mainboard"
-    powerfeather_mainboard_id: "my_powerfeather"
+    mainboard_id: "my_powerfeather"
     supply_good:
       name: "Supply Good"
 
 button:
   - platform: "powerfeather_mainboard"
-    powerfeather_mainboard_id: "my_powerfeather"
+    mainboard_id: "my_powerfeather"
     ship_mode:
       name: "Ship Mode"
     shutdown:
@@ -77,7 +77,7 @@ button:
 
 number:
   - platform: "powerfeather_mainboard"
-    powerfeather_mainboard_id: "my_powerfeather"
+    mainboard_id: "my_powerfeather"
     supply_maintain_voltage:
       name: "Supply Maintain Voltage"
     battery_charging_max_current:
@@ -85,7 +85,7 @@ number:
 
 switch:
   - platform: "powerfeather_mainboard"
-    powerfeather_mainboard_id: "my_powerfeather"
+    mainboard_id: "my_powerfeather"
     enable_3V3:
       name: "Enable 3V3"
     enable_VSQT:
