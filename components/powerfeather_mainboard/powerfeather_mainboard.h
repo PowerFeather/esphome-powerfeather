@@ -62,6 +62,7 @@ namespace esphome
     {
     public:
       void setup() override;
+      void loop() override;
       void update() override;
       void dump_config() override;
 
@@ -113,7 +114,7 @@ namespace esphome
     private:
       static const size_t UPDATE_TASK_STACK_SIZE_ = 3192;
       static const size_t UPDATE_TASK_QUEUE_SIZE_ = 10;
-      static const uint32_t UPDATE_TASK_QUEUE_WAIT_MS_ = 250;
+      static const uint32_t UPDATE_TASK_SENSOR_UPDATE_MS_ = 150;
 
       int32_t battery_capacity_;
       PowerFeather::Mainboard::BatteryType battery_type_;
@@ -164,6 +165,9 @@ namespace esphome
       number::Number *battery_charging_max_current_value_;
 
       static void update_task_(void *param);
+      void update_sensors_();
+
+      uint32_t last_update_time_ = 0;
     };
   } // namespace empty_compound_sensor
 } // namespace esphome

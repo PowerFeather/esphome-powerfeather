@@ -11,6 +11,79 @@ namespace esphome
   {
     static const char *TAG = "powerfeather_mainboard";
 
+    void PowerFeatherMainboard::update_sensors_()
+    {
+      if (supply_voltage_sensor_ != nullptr)
+      {
+        uint16_t supply_voltage = 0;
+        PowerFeather::Board.getSupplyVoltage(supply_voltage);
+        supply_voltage_ = supply_voltage / 1000.0f;
+      }
+
+      if (supply_current_sensor_ != nullptr)
+      {
+        int16_t supply_current = 0;
+        PowerFeather::Board.getSupplyCurrent(supply_current);
+        supply_current_ = supply_current / 1000.0f;
+      }
+
+      if (supply_good_sensor_ != nullptr)
+      {
+        bool supply_good = false;
+        PowerFeather::Board.checkSupplyGood(supply_good);
+        supply_good_ = supply_good;
+      }
+
+      if (battery_voltage_sensor_ != nullptr)
+      {
+        uint16_t battery_voltage = 0;
+        PowerFeather::Board.getBatteryVoltage(battery_voltage);
+        battery_voltage_ = battery_voltage / 1000.0f;
+      }
+
+      if (battery_current_sensor_ != nullptr)
+      {
+        int16_t battery_current = 0;
+        PowerFeather::Board.getBatteryCurrent(battery_current);
+        battery_current_ = battery_current / 1000.0f;
+      }
+
+      if (battery_charge_sensor_ != nullptr)
+      {
+        uint8_t battery_charge = 0;
+        PowerFeather::Board.getBatteryCharge(battery_charge);
+        battery_charge_ = battery_charge;
+      }
+
+      if (battery_health_sensor_ != nullptr)
+      {
+        uint8_t battery_health = 0;
+        PowerFeather::Board.getBatteryHealth(battery_health);
+        battery_health_ = battery_health;
+      }
+
+      if (battery_cycles_sensor_ != nullptr)
+      {
+        uint16_t battery_cycles = 0;
+        PowerFeather::Board.getBatteryCycles(battery_cycles);
+        battery_cycles_ = battery_cycles;
+      }
+
+      if (battery_time_left_sensor_ != nullptr)
+      {
+        int battery_time_left = 0;
+        PowerFeather::Board.getBatteryTimeLeft(battery_time_left);
+        battery_time_left_ = battery_time_left / 60.0f;
+      }
+
+      if (battery_temperature_sensor_ != nullptr)
+      {
+        float battery_temperature = 0;
+        PowerFeather::Board.getBatteryTemperature(battery_temperature);
+        battery_temperature_ = battery_temperature;
+      }
+    }
+
     void PowerFeatherMainboard::update_task_(void *param)
     {
       powerfeather_mainboard::PowerFeatherMainboard *powerfeather_mainboard =
@@ -20,7 +93,7 @@ namespace esphome
       {
         TaskUpdate update;
         update.type = TaskUpdateType::SENSORS;
-        xQueueReceive(powerfeather_mainboard->update_task_queue_, &update, pdMS_TO_TICKS(UPDATE_TASK_QUEUE_WAIT_MS_));
+        xQueueReceive(powerfeather_mainboard->update_task_queue_, &update, portMAX_DELAY);
         switch (update.type)
         {
         case TaskUpdateType::ENABLE_EN:
@@ -94,75 +167,7 @@ namespace esphome
         default:
         {
           ESP_LOGD(TAG, "Recieved sensors update request");
-          if (powerfeather_mainboard->supply_voltage_sensor_ != nullptr)
-          {
-            uint16_t supply_voltage = 0;
-            PowerFeather::Board.getSupplyVoltage(supply_voltage);
-            powerfeather_mainboard->supply_voltage_ = supply_voltage / 1000.0f;
-          }
-
-          if (powerfeather_mainboard->supply_current_sensor_ != nullptr)
-          {
-            int16_t supply_current = 0;
-            PowerFeather::Board.getSupplyCurrent(supply_current);
-            powerfeather_mainboard->supply_current_ = supply_current / 1000.0f;
-          }
-
-          if (powerfeather_mainboard->supply_good_sensor_ != nullptr)
-          {
-            bool supply_good = false;
-            PowerFeather::Board.checkSupplyGood(supply_good);
-            powerfeather_mainboard->supply_good_ = supply_good;
-          }
-
-          if (powerfeather_mainboard->battery_voltage_sensor_ != nullptr)
-          {
-            uint16_t battery_voltage = 0;
-            PowerFeather::Board.getBatteryVoltage(battery_voltage);
-            powerfeather_mainboard->battery_voltage_ = battery_voltage / 1000.0f;
-          }
-
-          if (powerfeather_mainboard->battery_current_sensor_ != nullptr)
-          {
-            int16_t battery_current = 0;
-            PowerFeather::Board.getBatteryCurrent(battery_current);
-            powerfeather_mainboard->battery_current_ = battery_current / 1000.0f;
-          }
-
-          if (powerfeather_mainboard->battery_charge_sensor_ != nullptr)
-          {
-            uint8_t battery_charge = 0;
-            PowerFeather::Board.getBatteryCharge(battery_charge);
-            powerfeather_mainboard->battery_charge_ = battery_charge;
-          }
-
-          if (powerfeather_mainboard->battery_health_sensor_ != nullptr)
-          {
-            uint8_t battery_health = 0;
-            PowerFeather::Board.getBatteryHealth(battery_health);
-            powerfeather_mainboard->battery_health_ = battery_health;
-          }
-
-          if (powerfeather_mainboard->battery_cycles_sensor_ != nullptr)
-          {
-            uint16_t battery_cycles = 0;
-            PowerFeather::Board.getBatteryCycles(battery_cycles);
-            powerfeather_mainboard->battery_cycles_ = battery_cycles;
-          }
-
-          if (powerfeather_mainboard->battery_time_left_sensor_ != nullptr)
-          {
-            int battery_time_left = 0;
-            PowerFeather::Board.getBatteryTimeLeft(battery_time_left);
-            powerfeather_mainboard->battery_time_left_ = battery_time_left / 60.0f;
-          }
-
-          if (powerfeather_mainboard->battery_temperature_sensor_ != nullptr)
-          {
-            float battery_temperature = 0;
-            PowerFeather::Board.getBatteryTemperature(battery_temperature);
-            powerfeather_mainboard->battery_temperature_ = battery_temperature;
-          }
+          powerfeather_mainboard->update_sensors_();
         }
         break;
         }
@@ -177,9 +182,10 @@ namespace esphome
       ESP_LOGD(TAG, "Initializing board, capacity: %d mV and type: %u", this->battery_capacity_, static_cast<uint32_t>(this->battery_type_));
       CHECK_RES(PowerFeather::Board.init(this->battery_capacity_, this->battery_type_));
 
+      update_sensors_();
+
       #undef CHECK_RES
       #define CHECK_RES(res)      if (!(res)) EXIT_SETUP();
-
 
       if (enable_3V3_switch_)
       {
@@ -261,10 +267,26 @@ namespace esphome
         mark_failed();
         return;
       }
+
+    }
+
+    void PowerFeatherMainboard::loop()
+    {
+      uint32_t now = xTaskGetTickCount();
+      // Do sensors update before an anticipated read
+      if (last_update_time_ == 0 || (now - last_update_time_) >= (this->update_interval_ - UPDATE_TASK_SENSOR_UPDATE_MS_))
+      {
+        ESP_LOGD(TAG, "Updating sensor values %d", xTaskGetTickCount());
+        TaskUpdate update;
+        update.type = TaskUpdateType::SENSORS;
+        send_task_update(update);
+        last_update_time_ = now;
+      }
     }
 
     void PowerFeatherMainboard::update()
     {
+      ESP_LOGD(TAG, "Publishing sensor values %d", xTaskGetTickCount());
       if (this->supply_voltage_sensor_ != nullptr)
       {
         this->supply_voltage_sensor_->publish_state(this->supply_voltage_);
