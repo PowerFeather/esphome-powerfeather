@@ -2,14 +2,14 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import number
 from esphome.const import (
-    UNIT_AMPERE,
-    UNIT_VOLT,
     DEVICE_CLASS_VOLTAGE,
     DEVICE_CLASS_CURRENT,
 )
 from .. import (
     ICON_VOLTAGE,
     ICON_CURRENT_DC,
+    UNIT_MILLIVOLT,
+    UNIT_MILLIAMPERE,
     CONF_POWERFEATHER_MAINBOARD_ID,
     POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA,
     TASK_UPDATE_TYPES,
@@ -17,12 +17,12 @@ from .. import (
 )
 
 # Definitions from SDK, needs to be duplicated here
-SUPPLY_MAINTAIN_VOLTAGE_MIN = 4.6
-SUPPLY_MAINTAIN_VOLTAGE_MAX = 16.8
-SUPPLY_MAINTAIN_VOLTAGE_STEP = 0.12
-BATTERY_CHARGING_CURRENT_MIN = 0.05
-BATTERY_CHARGING_CURRENT_MAX = 2
-BATTERY_CHARGING_CURRENT_STEP = 0.04
+SUPPLY_MAINTAIN_VOLTAGE_MIN = 4600
+SUPPLY_MAINTAIN_VOLTAGE_MAX = 16800
+SUPPLY_MAINTAIN_VOLTAGE_STEP = 12
+BATTERY_CHARGING_CURRENT_MIN = 50
+BATTERY_CHARGING_CURRENT_MAX = 2000
+BATTERY_CHARGING_CURRENT_STEP = 4
 
 CONF_SUPPLY_MAINTAIN_VOLTAGE_VALUE = "supply_maintain_voltage"
 CONF_BATTERY_CHARGING_MAX_CURRENT_VALUE = "battery_charging_max_current"
@@ -34,13 +34,13 @@ CONFIG_SCHEMA = POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA.extend(
         cv.Optional(CONF_SUPPLY_MAINTAIN_VOLTAGE_VALUE): number.number_schema(
             PowerFeatherValue,
             icon=ICON_VOLTAGE,
-            unit_of_measurement=UNIT_VOLT,
+            unit_of_measurement=UNIT_MILLIVOLT,
             device_class=DEVICE_CLASS_VOLTAGE
         ),
         cv.Optional(CONF_BATTERY_CHARGING_MAX_CURRENT_VALUE): number.number_schema(
             PowerFeatherValue,
             icon=ICON_CURRENT_DC,
-            unit_of_measurement=UNIT_AMPERE,
+            unit_of_measurement=UNIT_MILLIAMPERE,
             device_class=DEVICE_CLASS_CURRENT
         ),
     })

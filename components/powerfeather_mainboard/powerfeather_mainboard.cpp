@@ -10,7 +10,7 @@ namespace esphome
 {
   namespace powerfeather_mainboard
   {
-    static const char *TAG = "powerfeather_mainboard";
+    static const char *TAG = "mainboard";
 
     static uint32_t millis()
     {
@@ -23,14 +23,14 @@ namespace esphome
       {
         uint16_t supply_voltage = 0;
         PowerFeather::Board.getSupplyVoltage(supply_voltage);
-        supply_voltage_ = supply_voltage / 1000.0f;
+        supply_voltage_ = supply_voltage;
       }
 
       if (supply_current_sensor_ != nullptr)
       {
         int16_t supply_current = 0;
         PowerFeather::Board.getSupplyCurrent(supply_current);
-        supply_current_ = supply_current / 1000.0f;
+        supply_current_ = supply_current;
       }
 
       if (supply_good_sensor_ != nullptr)
@@ -44,14 +44,14 @@ namespace esphome
       {
         uint16_t battery_voltage = 0;
         PowerFeather::Board.getBatteryVoltage(battery_voltage);
-        battery_voltage_ = battery_voltage / 1000.0f;
+        battery_voltage_ = battery_voltage;
       }
 
       if (battery_current_sensor_ != nullptr)
       {
         int16_t battery_current = 0;
         PowerFeather::Board.getBatteryCurrent(battery_current);
-        battery_current_ = battery_current / 1000.0f;
+        battery_current_ = battery_current;
       }
 
       if (battery_charge_sensor_ != nullptr)
@@ -79,7 +79,7 @@ namespace esphome
       {
         int battery_time_left = 0;
         PowerFeather::Board.getBatteryTimeLeft(battery_time_left);
-        battery_time_left_ = battery_time_left / 60.0f;
+        battery_time_left_ = battery_time_left;
       }
 
       if (battery_temperature_sensor_ != nullptr)
@@ -159,13 +159,13 @@ namespace esphome
 
         case TaskUpdateType::SUPPLY_MAINTAIN_VOLTAGE:
           ESP_LOGD(TAG, "Recieved supply maintain voltage value update: %f", update.data.f);
-          powerfeather_mainboard->supply_maintain_voltage_ = update.data.f * 1000.f;
+          powerfeather_mainboard->supply_maintain_voltage_ = update.data.f;
           PowerFeather::Board.setSupplyMaintainVoltage(static_cast<uint16_t>(powerfeather_mainboard->supply_maintain_voltage_));
           break;
 
         case TaskUpdateType::BATTERY_CHARGING_MAX_CURRENT:
           ESP_LOGD(TAG, "Recieved battery charging max current update: %f", update.data.f);
-          powerfeather_mainboard->battery_charging_max_current_ = update.data.f * 1000.0f;
+          powerfeather_mainboard->battery_charging_max_current_ = update.data.f;
           PowerFeather::Board.setBatteryChargingMaxCurrent(static_cast<uint16_t>(powerfeather_mainboard->battery_charging_max_current_));
           break;
 
@@ -224,7 +224,7 @@ namespace esphome
       {
         uint16_t value = 0;
         CHECK_RES(PowerFeather::Board.getCharger().getVINDPM(value));
-        supply_maintain_voltage_ = value / 1000.0f;
+        supply_maintain_voltage_ = value;
         supply_maintain_voltage_value_->publish_state(supply_maintain_voltage_);
       }
 
@@ -232,7 +232,7 @@ namespace esphome
       {
         uint16_t value = 0;
         CHECK_RES(PowerFeather::Board.getCharger().getChargeCurrentLimit(value));
-        battery_charging_max_current_ = value / 1000.0f;
+        battery_charging_max_current_ = std::max(value, PowerFeather::Board.getFuelGauge().MinBatteryCapacity);
         battery_charging_max_current_value_->publish_state(battery_charging_max_current_);
       }
 

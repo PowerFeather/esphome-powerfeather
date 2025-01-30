@@ -6,6 +6,9 @@ ICON_CURRENT_DC = "mdi:current-dc"
 ICON_VOLTAGE = "mdi:sine-wave"
 ICON_ENERGY = "mdi:lightning-bolt"
 ICON_LED_ON = "mdi:led-on"
+UNIT_MILLIAMPERE = "mA"
+UNIT_MILLIVOLT = "mV"
+UNIT_MINUTES = "min"
 
 CODEOWNERS = ["powerfeatherdev (dev@powerfeather.dev)"]
 AUTO_LOAD = ["sensor", "binary_sensor", "switch", "button", "number"]

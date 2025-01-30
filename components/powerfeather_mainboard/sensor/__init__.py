@@ -7,11 +7,8 @@ from esphome.const import (
     ICON_THERMOMETER,
     ICON_TIMER,
     ICON_PERCENT,
-    UNIT_VOLT,
-    UNIT_AMPERE,
     UNIT_PERCENT,
     UNIT_EMPTY,
-    UNIT_HOUR,
     UNIT_CELSIUS,
     DEVICE_CLASS_VOLTAGE,
     DEVICE_CLASS_CURRENT,
@@ -23,6 +20,9 @@ from esphome.const import (
 from .. import (
     ICON_VOLTAGE,
     ICON_CURRENT_DC,
+    UNIT_MILLIAMPERE,
+    UNIT_MILLIVOLT,
+    UNIT_MINUTES,
     CONF_POWERFEATHER_MAINBOARD_ID,
     POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA,
 )
@@ -41,30 +41,26 @@ CONF_BATTERY_TEMPERATURE_SENSOR = "battery_temperature"
 CONFIG_SCHEMA = POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA.extend(
     {
         cv.Optional(CONF_SUPPLY_VOLTAGE_SENSOR): sensor.sensor_schema(
-            unit_of_measurement=UNIT_VOLT,
+            unit_of_measurement=UNIT_MILLIVOLT,
             icon=ICON_VOLTAGE,
-            accuracy_decimals=2,
             device_class=DEVICE_CLASS_VOLTAGE,
             state_class=STATE_CLASS_MEASUREMENT
         ),
         cv.Optional(CONF_SUPPLY_CURRENT_SENSOR): sensor.sensor_schema(
-            unit_of_measurement=UNIT_AMPERE,
+            unit_of_measurement=UNIT_MILLIAMPERE,
             icon=ICON_CURRENT_DC,
-            accuracy_decimals=2,
             device_class=DEVICE_CLASS_CURRENT,
             state_class=STATE_CLASS_MEASUREMENT
         ),
         cv.Optional(CONF_BATTERY_VOLTAGE_SENSOR): sensor.sensor_schema(
-            unit_of_measurement=UNIT_VOLT,
+            unit_of_measurement=UNIT_MILLIVOLT,
             icon=ICON_VOLTAGE,
-            accuracy_decimals=2,
             device_class=DEVICE_CLASS_VOLTAGE,
             state_class=STATE_CLASS_MEASUREMENT
         ),
         cv.Optional(CONF_BATTERY_CURRENT_SENSOR): sensor.sensor_schema(
-            unit_of_measurement=UNIT_AMPERE,
+            unit_of_measurement=UNIT_MILLIAMPERE,
             icon=ICON_CURRENT_DC,
-            accuracy_decimals=2,
             device_class=DEVICE_CLASS_CURRENT,
             state_class=STATE_CLASS_MEASUREMENT
         ),
@@ -85,7 +81,7 @@ CONFIG_SCHEMA = POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA.extend(
             state_class=STATE_CLASS_MEASUREMENT
         ),
         cv.Optional(CONF_BATTERY_TIME_LEFT_SENSOR): sensor.sensor_schema(
-            unit_of_measurement=UNIT_HOUR,
+            unit_of_measurement=UNIT_MINUTES,
             icon=ICON_TIMER,
             device_class=DEVICE_CLASS_DURATION,
             state_class=STATE_CLASS_MEASUREMENT
