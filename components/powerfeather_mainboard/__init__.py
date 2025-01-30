@@ -1,6 +1,6 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
-from esphome.const import CONF_ID
+from esphome.const import CONF_ID, CONF_UPDATE_INTERVAL
 
 ICON_CURRENT_DC = "mdi:current-dc"
 ICON_VOLTAGE = "mdi:sine-wave"
@@ -16,6 +16,8 @@ powerfeather_ns = cg.esphome_ns.namespace("powerfeather_mainboard")
 PowerFeatherMainboard = powerfeather_ns.class_(
     "PowerFeatherMainboard", cg.PollingComponent,
 )
+
+UPDATE_INTERVAL_MINIMUM = "500ms"
 
 # Definitions from SDK, needs to be duplicated here
 BATTERY_CAPACITY_MINIMUM = 50
@@ -51,6 +53,14 @@ POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA = cv.Schema(
     }
 )
 
+def validate_update_interval(value):
+    value = cv.positive_time_period_milliseconds(value)
+    if value < cv.time_period(UPDATE_INTERVAL_MINIMUM):
+        raise cv.Invalid(
+            "Update interval must be at least {}".format(UPDATE_INTERVAL_MINIMUM)
+        )
+    return value
+
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(PowerFeatherMainboard),
@@ -59,8 +69,9 @@ CONFIG_SCHEMA = cv.Schema(
             cv.Range(max=0)
         ),
         cv.Optional(CONF_BATTERY_TYPE, "Generic_3V7"): cv.enum(BATTERY_TYPES),
+        cv.Optional(CONF_UPDATE_INTERVAL, "10s") : validate_update_interval
     }
-).extend(cv.polling_component_schema("1s"))
+)
 
 async def to_code(config):
     mainboard = cg.new_Pvariable(config[CONF_ID])
@@ -72,5 +83,4 @@ async def to_code(config):
         cg.add(mainboard.set_battery_capacity(battery_capacity_config))
     if battery_type_config := config.get(CONF_BATTERY_TYPE):
         cg.add(mainboard.set_battery_type(battery_type_config))
-
 
