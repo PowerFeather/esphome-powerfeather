@@ -340,7 +340,27 @@ namespace esphome
 
     void PowerFeatherMainboard::dump_config()
     {
-      // TODO
+      ESP_LOGCONFIG(TAG, "Battery Capacity: %u", battery_capacity_);
+      const char* battery_type_str;
+      switch (battery_type_)
+      {
+      case PowerFeather::Mainboard::BatteryType::Generic_3V7:
+        battery_type_str = "Generic_3V7";
+        break;
+
+      case PowerFeather::Mainboard::BatteryType::ICR18650_26H:
+        battery_type_str = "ICR18650_26H";
+        break;
+
+      case PowerFeather::Mainboard::BatteryType::UR18650ZY:
+        battery_type_str = "UR18650ZY";
+        break;
+      
+      default:
+        battery_type_str = "Invalid";
+        break;
+      }
+      ESP_LOGCONFIG(TAG, "Battery Type: %s", battery_type_str);
     }
 
     void PowerFeatherMainboard::send_task_update(TaskUpdate update)
