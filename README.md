@@ -10,3 +10,16 @@ thresholds as numbers.
 
 See documentation at https://docs.powerfeather.dev/guides/create_esphome_device/
 for instructions on how to use this component.
+
+## Local checks
+
+The CI checks can also be run locally with Docker:
+
+```bash
+bash scripts/esphome-ci.sh validate
+bash scripts/esphome-ci.sh compile esp-idf v2
+bash scripts/esphome-ci.sh compile arduino v2
+```
+
+Run `bash scripts/esphome-ci.sh all` to execute the schema checks and full
+ESP-IDF/Arduino, V1/V2 compile matrix.

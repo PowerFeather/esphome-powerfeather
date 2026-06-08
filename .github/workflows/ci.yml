@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  validate:
+    name: Validate ESPHome Configs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check local test script syntax
+        run: bash -n scripts/esphome-ci.sh
+
+      - name: Validate schema cases
+        run: bash scripts/esphome-ci.sh validate
+
+  build:
+    name: Build ${{ matrix.framework }} ${{ matrix.revision }}
+    runs-on: ubuntu-latest
+    needs: validate
+
+    strategy:
+      fail-fast: false
+      matrix:
+        framework:
+          - esp-idf
+          - arduino
+        revision:
+          - v1
+          - v2
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Compile firmware
+        run: bash scripts/esphome-ci.sh compile "${{ matrix.framework }}" "${{ matrix.revision }}"
