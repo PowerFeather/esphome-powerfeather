@@ -328,21 +328,6 @@ namespace esphome
         battery_charging_max_current_value_->publish_state(battery_charging_max_current_);
       }
 
-      if (battery_low_voltage_alarm_value_)
-      {
-        battery_low_voltage_alarm_value_->publish_state(battery_low_voltage_alarm_);
-      }
-
-      if (battery_high_voltage_alarm_value_)
-      {
-        battery_high_voltage_alarm_value_->publish_state(battery_high_voltage_alarm_);
-      }
-
-      if (battery_low_charge_alarm_value_)
-      {
-        battery_low_charge_alarm_value_->publish_state(battery_low_charge_alarm_);
-      }
-
       if (enable_battery_charging_switch_ && battery_capacity_)
       {
         CHECK_BOOL("Read battery charging enable state", PowerFeather::Board.getCharger().getChargingEnabled(enable_battery_charging_));

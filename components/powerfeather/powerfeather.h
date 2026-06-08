@@ -154,9 +154,9 @@ namespace esphome
       float battery_temperature_{NAN};
       float battery_charging_max_current_{NAN};
       float supply_maintain_voltage_{NAN};
-      float battery_low_voltage_alarm_{0.0f};
-      float battery_high_voltage_alarm_{0.0f};
-      float battery_low_charge_alarm_{0.0f};
+      float battery_low_voltage_alarm_{NAN};
+      float battery_high_voltage_alarm_{NAN};
+      float battery_low_charge_alarm_{NAN};
 
       QueueHandle_t update_task_queue_ = NULL;
 
