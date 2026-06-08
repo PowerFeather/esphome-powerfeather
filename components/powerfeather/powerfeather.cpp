@@ -17,76 +17,114 @@ namespace esphome
       return esp_timer_get_time() / 1000;
     }
 
+    static bool check_result(const char *operation, PowerFeather::Result result)
+    {
+      if (result == PowerFeather::Result::Ok)
+      {
+        return true;
+      }
+      ESP_LOGW(TAG, "%s failed with SDK result %u", operation, static_cast<uint32_t>(result));
+      return false;
+    }
+
+    static bool check_bool_result(const char *operation, bool result)
+    {
+      if (result)
+      {
+        return true;
+      }
+      ESP_LOGW(TAG, "%s failed", operation);
+      return false;
+    }
+
+    template<typename T, typename ReadFn> void read_mainboard_value(const char *operation, T &target, ReadFn read)
+    {
+      T value{};
+      if (check_result(operation, read(value)))
+      {
+        target = value;
+      }
+    }
+
     void PowerFeatherMainboard::update_sensors_()
     {
       if (supply_voltage_sensor_ != nullptr)
       {
-        float supply_voltage = 0.0f;
-        PowerFeather::Board.getSupplyVoltage(supply_voltage);
-        supply_voltage_ = supply_voltage;
+        read_mainboard_value("Read supply voltage", supply_voltage_, [](float &value) {
+          return PowerFeather::Board.getSupplyVoltage(value);
+        });
       }
 
       if (supply_current_sensor_ != nullptr)
       {
-        float supply_current = 0.0f;
-        PowerFeather::Board.getSupplyCurrent(supply_current);
-        supply_current_ = supply_current;
+        read_mainboard_value("Read supply current", supply_current_, [](float &value) {
+          return PowerFeather::Board.getSupplyCurrent(value);
+        });
       }
 
       if (supply_good_sensor_ != nullptr)
       {
-        bool supply_good = false;
-        PowerFeather::Board.checkSupplyGood(supply_good);
-        supply_good_ = supply_good;
+        read_mainboard_value("Read supply good state", supply_good_, [](bool &value) {
+          return PowerFeather::Board.checkSupplyGood(value);
+        });
       }
 
       if (battery_voltage_sensor_ != nullptr)
       {
-        float battery_voltage = 0.0f;
-        PowerFeather::Board.getBatteryVoltage(battery_voltage);
-        battery_voltage_ = battery_voltage;
+        read_mainboard_value("Read battery voltage", battery_voltage_, [](float &value) {
+          return PowerFeather::Board.getBatteryVoltage(value);
+        });
       }
 
       if (battery_current_sensor_ != nullptr)
       {
-        float battery_current = 0.0f;
-        PowerFeather::Board.getBatteryCurrent(battery_current);
-        battery_current_ = battery_current;
+        read_mainboard_value("Read battery current", battery_current_, [](float &value) {
+          return PowerFeather::Board.getBatteryCurrent(value);
+        });
       }
 
       if (battery_charge_sensor_ != nullptr)
       {
         uint8_t battery_charge = 0;
-        PowerFeather::Board.getBatteryCharge(battery_charge);
-        battery_charge_ = battery_charge;
+        if (check_result("Read battery charge", PowerFeather::Board.getBatteryCharge(battery_charge)))
+        {
+          battery_charge_ = battery_charge;
+        }
       }
 
       if (battery_health_sensor_ != nullptr)
       {
         uint8_t battery_health = 0;
-        PowerFeather::Board.getBatteryHealth(battery_health);
-        battery_health_ = battery_health;
+        if (check_result("Read battery health", PowerFeather::Board.getBatteryHealth(battery_health)))
+        {
+          battery_health_ = battery_health;
+        }
       }
 
       if (battery_cycles_sensor_ != nullptr)
       {
         uint16_t battery_cycles = 0;
-        PowerFeather::Board.getBatteryCycles(battery_cycles);
-        battery_cycles_ = battery_cycles;
+        if (check_result("Read battery cycles", PowerFeather::Board.getBatteryCycles(battery_cycles)))
+        {
+          battery_cycles_ = battery_cycles;
+        }
       }
 
       if (battery_time_left_sensor_ != nullptr)
       {
-        int battery_time_left = 0;
-        PowerFeather::Board.getBatteryTimeLeft(battery_time_left);
-        battery_time_left_ = battery_time_left;
+        read_mainboard_value("Read battery time left", battery_time_left_, [](float &value) {
+          int battery_time_left = 0;
+          auto result = PowerFeather::Board.getBatteryTimeLeft(battery_time_left);
+          value = battery_time_left;
+          return result;
+        });
       }
 
       if (battery_temperature_sensor_ != nullptr)
       {
-        float battery_temperature = 0;
-        PowerFeather::Board.getBatteryTemperature(battery_temperature);
-        battery_temperature_ = battery_temperature;
+        read_mainboard_value("Read battery temperature", battery_temperature_, [](float &value) {
+          return PowerFeather::Board.getBatteryTemperature(value);
+        });
       }
     }
 
@@ -104,100 +142,124 @@ namespace esphome
         {
         case TaskUpdateType::ENABLE_EN:
           ESP_LOGD(TAG, "Received EN enable state: %d", update.data.b);
-          mainboard->enable_EN_ = update.data.b;
-          PowerFeather::Board.setEN(mainboard->enable_EN_);
+          if (check_result("Set EN enable state", PowerFeather::Board.setEN(update.data.b)))
+          {
+            mainboard->enable_EN_ = update.data.b;
+          }
           break;
 
         case TaskUpdateType::ENABLE_3V3:
           ESP_LOGD(TAG, "Received 3V3 enable state: %d", update.data.b);
-          mainboard->enable_3V3_ = update.data.b;
-          PowerFeather::Board.enable3V3(mainboard->enable_3V3_);
+          if (check_result("Set 3V3 enable state", PowerFeather::Board.enable3V3(update.data.b)))
+          {
+            mainboard->enable_3V3_ = update.data.b;
+          }
           break;
 
         case TaskUpdateType::ENABLE_VSQT:
           ESP_LOGD(TAG, "Received VSQT enable state: %d", update.data.b);
-          mainboard->enable_VSQT_ = update.data.b;
-          PowerFeather::Board.enableVSQT(mainboard->enable_VSQT_);
+          if (check_result("Set VSQT enable state", PowerFeather::Board.enableVSQT(update.data.b)))
+          {
+            mainboard->enable_VSQT_ = update.data.b;
+          }
           break;
 
         case TaskUpdateType::ENABLE_BATTERY_TEMP_SENSE:
-          ESP_LOGD(TAG, "Recieved enable battery temp sense: %d", update.data.b);
-          mainboard->enable_battery_temp_sense_ = update.data.b;
-          PowerFeather::Board.enableBatteryTempSense(mainboard->enable_battery_temp_sense_);
+          ESP_LOGD(TAG, "Received enable battery temp sense: %d", update.data.b);
+          if (check_result("Set battery temp sense enable state", PowerFeather::Board.enableBatteryTempSense(update.data.b)))
+          {
+            mainboard->enable_battery_temp_sense_ = update.data.b;
+          }
           break;
 
         case TaskUpdateType::ENABLE_BATTERY_FUEL_GAUGE:
-          ESP_LOGD(TAG, "Recieved enable battery fuel gauge: %d", update.data.b);
-          mainboard->enable_battery_fuel_gauge_ = update.data.b;
-          PowerFeather::Board.enableBatteryFuelGauge(mainboard->enable_battery_fuel_gauge_);
+          ESP_LOGD(TAG, "Received enable battery fuel gauge: %d", update.data.b);
+          if (check_result("Set battery fuel gauge enable state", PowerFeather::Board.enableBatteryFuelGauge(update.data.b)))
+          {
+            mainboard->enable_battery_fuel_gauge_ = update.data.b;
+          }
           break;
 
         case TaskUpdateType::ENABLE_BATTERY_CHARGING:
-          ESP_LOGD(TAG, "Recieved enable battery charging: %d", update.data.b);
-          mainboard->enable_battery_charging_ = update.data.b;
-          PowerFeather::Board.enableBatteryCharging(mainboard->enable_battery_charging_);
+          ESP_LOGD(TAG, "Received enable battery charging: %d", update.data.b);
+          if (check_result("Set battery charging enable state", PowerFeather::Board.enableBatteryCharging(update.data.b)))
+          {
+            mainboard->enable_battery_charging_ = update.data.b;
+          }
           break;
 
         case TaskUpdateType::ENABLE_STAT:
-          ESP_LOGD(TAG, "Recieved enable STAT LED: %d", update.data.b);
-          mainboard->enable_stat_ = update.data.b;
-          PowerFeather::Board.enableSTAT(mainboard->enable_stat_);
+          ESP_LOGD(TAG, "Received enable STAT LED: %d", update.data.b);
+          if (check_result("Set STAT LED enable state", PowerFeather::Board.enableSTAT(update.data.b)))
+          {
+            mainboard->enable_stat_ = update.data.b;
+          }
           break;
 
         case TaskUpdateType::POWERCYCLE:
-          ESP_LOGD(TAG, "Recieved powercycle request");
-          PowerFeather::Board.doPowerCycle();
+          ESP_LOGD(TAG, "Received powercycle request");
+          check_result("Power cycle", PowerFeather::Board.doPowerCycle());
           break;
 
         case TaskUpdateType::UPDATE_BATTERY_FUEL_GAUGE_TEMP:
-          ESP_LOGD(TAG, "Recieved battery fuel gauge temperature update request");
-          PowerFeather::Board.updateBatteryFuelGaugeTemp();
+          ESP_LOGD(TAG, "Received battery fuel gauge temperature update request");
+          check_result("Update battery fuel gauge temperature", PowerFeather::Board.updateBatteryFuelGaugeTemp());
           break;
 
         case TaskUpdateType::SHIP_MODE:
-          ESP_LOGD(TAG, "Recieved ship mode request");
-          PowerFeather::Board.enterShipMode();
+          ESP_LOGD(TAG, "Received ship mode request");
+          check_result("Enter ship mode", PowerFeather::Board.enterShipMode());
           break;
 
         case TaskUpdateType::SHUTDOWN:
-          ESP_LOGD(TAG, "Recieved shutdown request");
-          PowerFeather::Board.enterShutdownMode();
+          ESP_LOGD(TAG, "Received shutdown request");
+          check_result("Enter shutdown mode", PowerFeather::Board.enterShutdownMode());
           break;
 
         case TaskUpdateType::SUPPLY_MAINTAIN_VOLTAGE:
-          ESP_LOGD(TAG, "Recieved supply maintain voltage value update: %f", update.data.f);
-          mainboard->supply_maintain_voltage_ = update.data.f;
-          PowerFeather::Board.setSupplyMaintainVoltage(mainboard->supply_maintain_voltage_);
+          ESP_LOGD(TAG, "Received supply maintain voltage value update: %f", update.data.f);
+          if (check_result("Set supply maintain voltage", PowerFeather::Board.setSupplyMaintainVoltage(update.data.f)))
+          {
+            mainboard->supply_maintain_voltage_ = update.data.f;
+          }
           break;
 
         case TaskUpdateType::BATTERY_CHARGING_MAX_CURRENT:
-          ESP_LOGD(TAG, "Recieved battery charging max current update: %f", update.data.f);
-          mainboard->battery_charging_max_current_ = update.data.f;
-          PowerFeather::Board.setBatteryChargingMaxCurrent(mainboard->battery_charging_max_current_);
+          ESP_LOGD(TAG, "Received battery charging max current update: %f", update.data.f);
+          if (check_result("Set battery charging max current", PowerFeather::Board.setBatteryChargingMaxCurrent(update.data.f)))
+          {
+            mainboard->battery_charging_max_current_ = update.data.f;
+          }
           break;
 
         case TaskUpdateType::BATTERY_LOW_VOLTAGE_ALARM:
-          ESP_LOGD(TAG, "Recieved battery low voltage alarm update: %f", update.data.f);
-          mainboard->battery_low_voltage_alarm_ = update.data.f;
-          PowerFeather::Board.setBatteryLowVoltageAlarm(mainboard->battery_low_voltage_alarm_);
+          ESP_LOGD(TAG, "Received battery low voltage alarm update: %f", update.data.f);
+          if (check_result("Set battery low voltage alarm", PowerFeather::Board.setBatteryLowVoltageAlarm(update.data.f)))
+          {
+            mainboard->battery_low_voltage_alarm_ = update.data.f;
+          }
           break;
 
         case TaskUpdateType::BATTERY_HIGH_VOLTAGE_ALARM:
-          ESP_LOGD(TAG, "Recieved battery high voltage alarm update: %f", update.data.f);
-          mainboard->battery_high_voltage_alarm_ = update.data.f;
-          PowerFeather::Board.setBatteryHighVoltageAlarm(mainboard->battery_high_voltage_alarm_);
+          ESP_LOGD(TAG, "Received battery high voltage alarm update: %f", update.data.f);
+          if (check_result("Set battery high voltage alarm", PowerFeather::Board.setBatteryHighVoltageAlarm(update.data.f)))
+          {
+            mainboard->battery_high_voltage_alarm_ = update.data.f;
+          }
           break;
 
         case TaskUpdateType::BATTERY_LOW_CHARGE_ALARM:
-          ESP_LOGD(TAG, "Recieved battery low charge alarm update: %f", update.data.f);
-          mainboard->battery_low_charge_alarm_ = update.data.f;
-          PowerFeather::Board.setBatteryLowChargeAlarm(static_cast<uint8_t>(mainboard->battery_low_charge_alarm_));
+          ESP_LOGD(TAG, "Received battery low charge alarm update: %f", update.data.f);
+          if (check_result("Set battery low charge alarm", PowerFeather::Board.setBatteryLowChargeAlarm(static_cast<uint8_t>(update.data.f))))
+          {
+            mainboard->battery_low_charge_alarm_ = update.data.f;
+          }
           break;
 
         case TaskUpdateType::SENSORS:
         default:
         {
-          ESP_LOGD(TAG, "Recieved sensors update request");
+          ESP_LOGD(TAG, "Received sensors update request");
           mainboard->update_sensors_();
         }
         break;
@@ -208,22 +270,20 @@ namespace esphome
     void PowerFeatherMainboard::setup()
     {
       #define EXIT_SETUP()        { mark_failed(); ESP_LOGE(TAG, "Failed setup at line %d", __LINE__); return; }
-      #define CHECK_RES(res)      if ((res) != PowerFeather::Result::Ok) EXIT_SETUP();
+      #define CHECK_RES(operation, res)      if (!check_result((operation), (res))) EXIT_SETUP();
+      #define CHECK_BOOL(operation, res)     if (!check_bool_result((operation), (res))) EXIT_SETUP();
 
       ESP_LOGD(TAG, "Initializing board, capacity: %d mAh and type: %u", this->battery_capacity_, static_cast<uint32_t>(this->battery_type_));
       if (this->battery_capacity_)
       {
-        CHECK_RES(PowerFeather::Board.init(this->battery_capacity_, this->battery_type_));
+        CHECK_RES("Initialize PowerFeather board with battery", PowerFeather::Board.init(this->battery_capacity_, this->battery_type_));
       }
       else
       {
-        CHECK_RES(PowerFeather::Board.init());
+        CHECK_RES("Initialize PowerFeather board without battery", PowerFeather::Board.init());
       }
 
       update_sensors_();
-
-      #undef CHECK_RES
-      #define CHECK_RES(res)      if (!(res)) EXIT_SETUP();
 
       if (enable_3V3_switch_)
       {
@@ -248,14 +308,14 @@ namespace esphome
 
       if (enable_stat_switch_)
       {
-        CHECK_RES(PowerFeather::Board.getCharger().getSTATEnabled(enable_stat_));
+        CHECK_BOOL("Read STAT LED enable state", PowerFeather::Board.getCharger().getSTATEnabled(enable_stat_));
         enable_stat_switch_->publish_state(enable_stat_);
       }
 
       if (supply_maintain_voltage_value_)
       {
         float value = 0.0f;
-        CHECK_RES(PowerFeather::Board.getCharger().getVINDPM(value));
+        CHECK_BOOL("Read supply maintain voltage", PowerFeather::Board.getCharger().getVINDPM(value));
         supply_maintain_voltage_ = value;
         supply_maintain_voltage_value_->publish_state(supply_maintain_voltage_);
       }
@@ -263,7 +323,7 @@ namespace esphome
       if (battery_charging_max_current_value_)
       {
         float value = 0.0f;
-        CHECK_RES(PowerFeather::Board.getCharger().getChargeCurrentLimit(value));
+        CHECK_BOOL("Read battery charging max current", PowerFeather::Board.getCharger().getChargeCurrentLimit(value));
         battery_charging_max_current_ = value;
         battery_charging_max_current_value_->publish_state(battery_charging_max_current_);
       }
@@ -285,13 +345,13 @@ namespace esphome
 
       if (enable_battery_charging_switch_ && battery_capacity_)
       {
-        CHECK_RES(PowerFeather::Board.getCharger().getChargingEnabled(enable_battery_charging_));
+        CHECK_BOOL("Read battery charging enable state", PowerFeather::Board.getCharger().getChargingEnabled(enable_battery_charging_));
         enable_battery_charging_switch_->publish_state(enable_battery_charging_);
       }
 
       if (enable_battery_temp_sense_switch_)
       {
-        CHECK_RES(PowerFeather::Board.getCharger().getTSEnabled(enable_battery_temp_sense_));
+        CHECK_BOOL("Read battery temp sense enable state", PowerFeather::Board.getCharger().getTSEnabled(enable_battery_temp_sense_));
         enable_battery_temp_sense_switch_->publish_state(enable_battery_temp_sense_);
       }
 
@@ -305,6 +365,7 @@ namespace esphome
       }
 
       #undef CHECK_RES
+      #undef CHECK_BOOL
 
       update_task_queue_ = xQueueCreate(UPDATE_TASK_QUEUE_SIZE_, sizeof(TaskUpdate));
       if (update_task_queue_ == NULL)
@@ -416,7 +477,16 @@ namespace esphome
 
     void PowerFeatherMainboard::send_task_update(TaskUpdate update)
     {
-      xQueueSend(update_task_queue_, &update, portMAX_DELAY);
+      if (update_task_queue_ == NULL)
+      {
+        ESP_LOGW(TAG, "PowerFeather update queue is not available");
+        return;
+      }
+
+      if (xQueueSend(update_task_queue_, &update, portMAX_DELAY) != pdTRUE)
+      {
+        ESP_LOGW(TAG, "Failed to queue PowerFeather update");
+      }
     }
 
   } // namespace powerfeather
