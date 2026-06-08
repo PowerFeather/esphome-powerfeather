@@ -127,6 +127,11 @@ namespace esphome
 
       if (battery_temperature_sensor_ != nullptr)
       {
+        if (!enable_battery_temp_sense_)
+        {
+          battery_temperature_ = NAN;
+          return;
+        }
         read_mainboard_value("Read battery temperature", battery_temperature_, [](float &value) {
           return PowerFeather::Board.getBatteryTemperature(value);
         });
@@ -191,6 +196,10 @@ namespace esphome
           if (check_result("Set battery temp sense enable state", PowerFeather::Board.enableBatteryTempSense(update.data.b)))
           {
             mainboard->enable_battery_temp_sense_ = update.data.b;
+            if (!mainboard->enable_battery_temp_sense_)
+            {
+              mainboard->battery_temperature_ = NAN;
+            }
           }
           publish_bool(TaskUpdateType::ENABLE_BATTERY_TEMP_SENSE, mainboard->enable_battery_temp_sense_);
           break;
@@ -314,8 +323,6 @@ namespace esphome
         CHECK_RES("Initialize PowerFeather board without battery", PowerFeather::Board.init());
       }
 
-      update_sensors_();
-
       if (enable_3V3_switch_)
       {
         enable_3V3_ = rtc_gpio_get_level(PIN_EN_3V3);
@@ -362,10 +369,13 @@ namespace esphome
         enable_battery_charging_switch_->publish_state(enable_battery_charging_);
       }
 
-      if (enable_battery_temp_sense_switch_)
+      if (enable_battery_temp_sense_switch_ || battery_temperature_sensor_ != nullptr)
       {
         CHECK_BOOL("Read battery temp sense enable state", PowerFeather::Board.getCharger().getTSEnabled(enable_battery_temp_sense_));
-        enable_battery_temp_sense_switch_->publish_state(enable_battery_temp_sense_);
+        if (enable_battery_temp_sense_switch_)
+        {
+          enable_battery_temp_sense_switch_->publish_state(enable_battery_temp_sense_);
+        }
       }
 
       if (enable_battery_fuel_gauge_switch_ && battery_capacity_)
@@ -376,6 +386,8 @@ namespace esphome
         PowerFeather::Board.getFuelGauge().getEnabled(enable_battery_fuel_gauge_);
         enable_battery_fuel_gauge_switch_->publish_state(enable_battery_fuel_gauge_);
       }
+
+      update_sensors_();
 
       #undef CHECK_RES
       #undef CHECK_BOOL
