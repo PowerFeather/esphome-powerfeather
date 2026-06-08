@@ -11,6 +11,11 @@ namespace esphome
   namespace powerfeather
   {
     static const char *TAG = "powerfeather.mainboard";
+    // Mirrored from SDK-managed Mainboard::Pin values. The SDK exposes setters,
+    // but not getters, so setup reads the retained RTC output levels directly.
+    static constexpr gpio_num_t PIN_EN_3V3 = GPIO_NUM_4;
+    static constexpr gpio_num_t PIN_EN_VSQT = GPIO_NUM_14;
+    static constexpr gpio_num_t PIN_EN0 = GPIO_NUM_13;
 
     static uint32_t millis()
     {
@@ -287,22 +292,19 @@ namespace esphome
 
       if (enable_3V3_switch_)
       {
-        static constexpr gpio_num_t EN_3V3 = GPIO_NUM_4;
-        enable_3V3_ = rtc_gpio_get_level(EN_3V3);
+        enable_3V3_ = rtc_gpio_get_level(PIN_EN_3V3);
         enable_3V3_switch_->publish_state(enable_3V3_);
       }
 
       if (enable_VSQT_switch_)
       {
-        static constexpr gpio_num_t EN_VSQT = GPIO_NUM_14;
-        enable_VSQT_ = rtc_gpio_get_level(EN_VSQT);
+        enable_VSQT_ = rtc_gpio_get_level(PIN_EN_VSQT);
         enable_VSQT_switch_->publish_state(enable_VSQT_);
       }
 
       if (enable_EN_switch_)
       {
-        static constexpr gpio_num_t EN0 = GPIO_NUM_13;
-        enable_EN_ = rtc_gpio_get_level(EN0);
+        enable_EN_ = rtc_gpio_get_level(PIN_EN0);
         enable_EN_switch_->publish_state(enable_EN_);
       }
 
