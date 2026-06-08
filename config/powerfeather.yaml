@@ -87,7 +87,7 @@ powerfeather:
 
     switches:
       enable_EN:
-        name: "Enable FeatherWings"
+        name: "Enable EN Pin"
       enable_3V3:
         name: "Enable 3V3"
       enable_VSQT:
