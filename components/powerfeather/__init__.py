@@ -111,6 +111,7 @@ BATTERY_TYPES = {
     "UR18650ZY": BatteryType.UR18650ZY,
     "Generic_LFP": BatteryType.Generic_LFP,
 }
+BATTERY_TYPE_OPTIONS = {key: key for key in BATTERY_TYPES}
 
 TaskUpdateType = powerfeather_ns.enum("TaskUpdateType")
 TASK_UPDATE_TYPES = {
@@ -144,7 +145,7 @@ BATTERY_SCHEMA = cv.Schema(
             min=0,
             max=BATTERY_CAPACITY_MAXIMUM_V2,
         ),
-        cv.Optional(CONF_TYPE, default="Generic_3V7"): cv.enum(BATTERY_TYPES),
+        cv.Optional(CONF_TYPE, default="Generic_3V7"): cv.enum(BATTERY_TYPE_OPTIONS),
     }
 )
 
@@ -288,7 +289,7 @@ def validate_battery_capacity_for_board_revision(config):
     battery_type = battery[CONF_TYPE]
     if (
         config[CONF_BOARD_REVISION] == BOARD_REVISION_V1
-        and battery_type == BatteryType.Generic_LFP
+        and battery_type == "Generic_LFP"
     ):
         raise cv.Invalid("Generic_LFP battery type requires board_revision v2")
 
@@ -397,7 +398,7 @@ async def to_code(config):
 
         battery = mainboard_config[CONF_BATTERY]
         cg.add(mainboard.set_battery_capacity(battery[CONF_CAPACITY]))
-        cg.add(mainboard.set_battery_type(battery[CONF_TYPE]))
+        cg.add(mainboard.set_battery_type(BATTERY_TYPES[battery[CONF_TYPE]]))
 
         sensors = mainboard_config[CONF_SENSORS]
         await _add_sensor(mainboard, sensors, CONF_SUPPLY_VOLTAGE, "set_supply_voltage_sensor")
