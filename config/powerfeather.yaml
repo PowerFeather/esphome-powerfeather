@@ -13,7 +13,6 @@ logger:
   level: DEBUG
 
 api:
-  password: "no"
 
 ota:
   - platform: esphome
@@ -32,6 +31,7 @@ external_components:
     refresh: 0s
 
 powerfeather_mainboard:
+  board_revision: v2
   battery_capacity: 1000
   battery_type: "Generic_3V7"
   id: "my_powerfeather"

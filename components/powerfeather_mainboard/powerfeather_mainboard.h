@@ -8,6 +8,7 @@
 #include "esphome/components/button/button.h"
 
 #include <PowerFeather.h>
+#include <cmath>
 
 namespace esphome
 {
@@ -18,6 +19,7 @@ namespace esphome
       Generic_3V7,
       ICR18650_26H,
       UR18650ZY,
+      Generic_LFP,
     };
 
    enum TaskUpdateType
@@ -77,6 +79,9 @@ namespace esphome
         case UR18650ZY:
           battery_type_ = PowerFeather::Mainboard::BatteryType::UR18650ZY;
           break;
+        case Generic_LFP:
+          battery_type_ = PowerFeather::Mainboard::BatteryType::Generic_LFP;
+          break;
         case Generic_3V7:
         default:
           battery_type_ = PowerFeather::Mainboard::BatteryType::Generic_3V7;
@@ -116,53 +121,53 @@ namespace esphome
       static const size_t UPDATE_TASK_QUEUE_SIZE_ = 10;
       static const uint32_t UPDATE_TASK_SENSOR_UPDATE_MS_ = 150;
 
-      int32_t battery_capacity_;
-      PowerFeather::Mainboard::BatteryType battery_type_;
+      int32_t battery_capacity_{0};
+      PowerFeather::Mainboard::BatteryType battery_type_{PowerFeather::Mainboard::BatteryType::Generic_3V7};
 
-      bool supply_good_;
-      bool enable_EN_;
-      bool enable_3V3_;
-      bool enable_VSQT_;
-      bool enable_battery_charging_;
-      bool enable_battery_temp_sense_;
-      bool enable_battery_fuel_gauge_;
-      bool enable_stat_;
-      float supply_voltage_;
-      float supply_current_;
-      float battery_voltage_;
-      float battery_current_;
-      float battery_charge_;
-      float battery_health_;
-      float battery_cycles_;
-      float battery_time_left_;
-      float battery_temperature_;
-      float battery_charging_max_current_;
-      float supply_maintain_voltage_;
+      bool supply_good_{false};
+      bool enable_EN_{false};
+      bool enable_3V3_{false};
+      bool enable_VSQT_{false};
+      bool enable_battery_charging_{false};
+      bool enable_battery_temp_sense_{false};
+      bool enable_battery_fuel_gauge_{false};
+      bool enable_stat_{false};
+      float supply_voltage_{NAN};
+      float supply_current_{NAN};
+      float battery_voltage_{NAN};
+      float battery_current_{NAN};
+      float battery_charge_{NAN};
+      float battery_health_{NAN};
+      float battery_cycles_{NAN};
+      float battery_time_left_{NAN};
+      float battery_temperature_{NAN};
+      float battery_charging_max_current_{NAN};
+      float supply_maintain_voltage_{NAN};
 
       QueueHandle_t update_task_queue_ = NULL;
 
-      switch_::Switch *enable_EN_switch_;
-      switch_::Switch *enable_3V3_switch_;
-      switch_::Switch *enable_VSQT_switch_;
-      switch_::Switch *enable_battery_temp_sense_switch_;
-      switch_::Switch *enable_battery_charging_switch_;
-      switch_::Switch *enable_battery_fuel_gauge_switch_;
-      switch_::Switch *enable_stat_switch_;
-      binary_sensor::BinarySensor *supply_good_sensor_;
-      sensor::Sensor *supply_voltage_sensor_;
-      sensor::Sensor *supply_current_sensor_;
-      sensor::Sensor *battery_voltage_sensor_;
-      sensor::Sensor *battery_current_sensor_;
-      sensor::Sensor *battery_charge_sensor_;
-      sensor::Sensor *battery_health_sensor_;
-      sensor::Sensor *battery_cycles_sensor_;
-      sensor::Sensor *battery_time_left_sensor_;
-      sensor::Sensor *battery_temperature_sensor_;
-      button::Button *ship_mode_button_;
-      button::Button *shutdown_button_;
-      button::Button *powercycle_button_;
-      number::Number *supply_maintain_voltage_value_;
-      number::Number *battery_charging_max_current_value_;
+      switch_::Switch *enable_EN_switch_{nullptr};
+      switch_::Switch *enable_3V3_switch_{nullptr};
+      switch_::Switch *enable_VSQT_switch_{nullptr};
+      switch_::Switch *enable_battery_temp_sense_switch_{nullptr};
+      switch_::Switch *enable_battery_charging_switch_{nullptr};
+      switch_::Switch *enable_battery_fuel_gauge_switch_{nullptr};
+      switch_::Switch *enable_stat_switch_{nullptr};
+      binary_sensor::BinarySensor *supply_good_sensor_{nullptr};
+      sensor::Sensor *supply_voltage_sensor_{nullptr};
+      sensor::Sensor *supply_current_sensor_{nullptr};
+      sensor::Sensor *battery_voltage_sensor_{nullptr};
+      sensor::Sensor *battery_current_sensor_{nullptr};
+      sensor::Sensor *battery_charge_sensor_{nullptr};
+      sensor::Sensor *battery_health_sensor_{nullptr};
+      sensor::Sensor *battery_cycles_sensor_{nullptr};
+      sensor::Sensor *battery_time_left_sensor_{nullptr};
+      sensor::Sensor *battery_temperature_sensor_{nullptr};
+      button::Button *ship_mode_button_{nullptr};
+      button::Button *shutdown_button_{nullptr};
+      button::Button *powercycle_button_{nullptr};
+      number::Number *supply_maintain_voltage_value_{nullptr};
+      number::Number *battery_charging_max_current_value_{nullptr};
 
       static void update_task_(void *param);
       void update_sensors_();

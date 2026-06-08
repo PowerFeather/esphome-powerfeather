@@ -21,8 +21,8 @@ from .. import (
     ICON_VOLTAGE,
     ICON_CURRENT_DC,
     UNIT_MILLIAMPERE,
-    UNIT_MILLIVOLT,
     UNIT_MINUTES,
+    UNIT_VOLT,
     CONF_POWERFEATHER_MAINBOARD_ID,
     POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA,
 )
@@ -41,7 +41,7 @@ CONF_BATTERY_TEMPERATURE_SENSOR = "battery_temperature"
 CONFIG_SCHEMA = POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA.extend(
     {
         cv.Optional(CONF_SUPPLY_VOLTAGE_SENSOR): sensor.sensor_schema(
-            unit_of_measurement=UNIT_MILLIVOLT,
+            unit_of_measurement=UNIT_VOLT,
             icon=ICON_VOLTAGE,
             device_class=DEVICE_CLASS_VOLTAGE,
             state_class=STATE_CLASS_MEASUREMENT
@@ -53,7 +53,7 @@ CONFIG_SCHEMA = POWERFEATHER_MAINBOARD_COMPONENT_SCHEMA.extend(
             state_class=STATE_CLASS_MEASUREMENT
         ),
         cv.Optional(CONF_BATTERY_VOLTAGE_SENSOR): sensor.sensor_schema(
-            unit_of_measurement=UNIT_MILLIVOLT,
+            unit_of_measurement=UNIT_VOLT,
             icon=ICON_VOLTAGE,
             device_class=DEVICE_CLASS_VOLTAGE,
             state_class=STATE_CLASS_MEASUREMENT
@@ -125,4 +125,3 @@ async def to_code(config):
     if battery_temperature_sensor_config := config.get(CONF_BATTERY_TEMPERATURE_SENSOR):
         sens = await sensor.new_sensor(battery_temperature_sensor_config)
         cg.add(mainboard.set_battery_temperature_sensor(sens))
-

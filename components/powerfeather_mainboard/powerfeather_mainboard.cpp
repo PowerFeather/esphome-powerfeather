@@ -21,14 +21,14 @@ namespace esphome
     {
       if (supply_voltage_sensor_ != nullptr)
       {
-        uint16_t supply_voltage = 0;
+        float supply_voltage = 0.0f;
         PowerFeather::Board.getSupplyVoltage(supply_voltage);
         supply_voltage_ = supply_voltage;
       }
 
       if (supply_current_sensor_ != nullptr)
       {
-        int16_t supply_current = 0;
+        float supply_current = 0.0f;
         PowerFeather::Board.getSupplyCurrent(supply_current);
         supply_current_ = supply_current;
       }
@@ -42,14 +42,14 @@ namespace esphome
 
       if (battery_voltage_sensor_ != nullptr)
       {
-        uint16_t battery_voltage = 0;
+        float battery_voltage = 0.0f;
         PowerFeather::Board.getBatteryVoltage(battery_voltage);
         battery_voltage_ = battery_voltage;
       }
 
       if (battery_current_sensor_ != nullptr)
       {
-        int16_t battery_current = 0;
+        float battery_current = 0.0f;
         PowerFeather::Board.getBatteryCurrent(battery_current);
         battery_current_ = battery_current;
       }
@@ -160,13 +160,13 @@ namespace esphome
         case TaskUpdateType::SUPPLY_MAINTAIN_VOLTAGE:
           ESP_LOGD(TAG, "Recieved supply maintain voltage value update: %f", update.data.f);
           powerfeather_mainboard->supply_maintain_voltage_ = update.data.f;
-          PowerFeather::Board.setSupplyMaintainVoltage(static_cast<uint16_t>(powerfeather_mainboard->supply_maintain_voltage_));
+          PowerFeather::Board.setSupplyMaintainVoltage(powerfeather_mainboard->supply_maintain_voltage_);
           break;
 
         case TaskUpdateType::BATTERY_CHARGING_MAX_CURRENT:
           ESP_LOGD(TAG, "Recieved battery charging max current update: %f", update.data.f);
           powerfeather_mainboard->battery_charging_max_current_ = update.data.f;
-          PowerFeather::Board.setBatteryChargingMaxCurrent(static_cast<uint16_t>(powerfeather_mainboard->battery_charging_max_current_));
+          PowerFeather::Board.setBatteryChargingMaxCurrent(powerfeather_mainboard->battery_charging_max_current_);
           break;
 
         case TaskUpdateType::SENSORS:
@@ -185,8 +185,15 @@ namespace esphome
       #define EXIT_SETUP()        { mark_failed(); ESP_LOGE(TAG, "Failed setup at line %d", __LINE__); return; }
       #define CHECK_RES(res)      if ((res) != PowerFeather::Result::Ok) EXIT_SETUP();
 
-      ESP_LOGD(TAG, "Initializing board, capacity: %d mV and type: %u", this->battery_capacity_, static_cast<uint32_t>(this->battery_type_));
-      CHECK_RES(PowerFeather::Board.init(this->battery_capacity_, this->battery_type_));
+      ESP_LOGD(TAG, "Initializing board, capacity: %d mAh and type: %u", this->battery_capacity_, static_cast<uint32_t>(this->battery_type_));
+      if (this->battery_capacity_)
+      {
+        CHECK_RES(PowerFeather::Board.init(this->battery_capacity_, this->battery_type_));
+      }
+      else
+      {
+        CHECK_RES(PowerFeather::Board.init());
+      }
 
       update_sensors_();
 
@@ -222,7 +229,7 @@ namespace esphome
 
       if (supply_maintain_voltage_value_)
       {
-        uint16_t value = 0;
+        float value = 0.0f;
         CHECK_RES(PowerFeather::Board.getCharger().getVINDPM(value));
         supply_maintain_voltage_ = value;
         supply_maintain_voltage_value_->publish_state(supply_maintain_voltage_);
@@ -230,9 +237,9 @@ namespace esphome
 
       if (battery_charging_max_current_value_)
       {
-        uint16_t value = 0;
+        float value = 0.0f;
         CHECK_RES(PowerFeather::Board.getCharger().getChargeCurrentLimit(value));
-        battery_charging_max_current_ = std::max(value, PowerFeather::Board.getFuelGauge().MinBatteryCapacity);
+        battery_charging_max_current_ = value;
         battery_charging_max_current_value_->publish_state(battery_charging_max_current_);
       }
 
@@ -253,7 +260,7 @@ namespace esphome
         // Can fail here when no battery is actually connected, so do not check the result.
         // In that case, consider as not enabled. Initialize value before attempting to read.
         enable_battery_fuel_gauge_ = false;
-        PowerFeather::Board.getFuelGauge().getOperationMode(enable_battery_fuel_gauge_);
+        PowerFeather::Board.getFuelGauge().getEnabled(enable_battery_fuel_gauge_);
         enable_battery_fuel_gauge_switch_->publish_state(enable_battery_fuel_gauge_);
       }
 
@@ -354,6 +361,10 @@ namespace esphome
 
       case PowerFeather::Mainboard::BatteryType::UR18650ZY:
         battery_type_str = "UR18650ZY";
+        break;
+
+      case PowerFeather::Mainboard::BatteryType::Generic_LFP:
+        battery_type_str = "Generic_LFP";
         break;
       
       default:
