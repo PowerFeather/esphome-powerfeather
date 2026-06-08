@@ -147,6 +147,11 @@ namespace esphome
           PowerFeather::Board.doPowerCycle();
           break;
 
+        case TaskUpdateType::UPDATE_BATTERY_FUEL_GAUGE_TEMP:
+          ESP_LOGD(TAG, "Recieved battery fuel gauge temperature update request");
+          PowerFeather::Board.updateBatteryFuelGaugeTemp();
+          break;
+
         case TaskUpdateType::SHIP_MODE:
           ESP_LOGD(TAG, "Recieved ship mode request");
           PowerFeather::Board.enterShipMode();
@@ -167,6 +172,24 @@ namespace esphome
           ESP_LOGD(TAG, "Recieved battery charging max current update: %f", update.data.f);
           mainboard->battery_charging_max_current_ = update.data.f;
           PowerFeather::Board.setBatteryChargingMaxCurrent(mainboard->battery_charging_max_current_);
+          break;
+
+        case TaskUpdateType::BATTERY_LOW_VOLTAGE_ALARM:
+          ESP_LOGD(TAG, "Recieved battery low voltage alarm update: %f", update.data.f);
+          mainboard->battery_low_voltage_alarm_ = update.data.f;
+          PowerFeather::Board.setBatteryLowVoltageAlarm(mainboard->battery_low_voltage_alarm_);
+          break;
+
+        case TaskUpdateType::BATTERY_HIGH_VOLTAGE_ALARM:
+          ESP_LOGD(TAG, "Recieved battery high voltage alarm update: %f", update.data.f);
+          mainboard->battery_high_voltage_alarm_ = update.data.f;
+          PowerFeather::Board.setBatteryHighVoltageAlarm(mainboard->battery_high_voltage_alarm_);
+          break;
+
+        case TaskUpdateType::BATTERY_LOW_CHARGE_ALARM:
+          ESP_LOGD(TAG, "Recieved battery low charge alarm update: %f", update.data.f);
+          mainboard->battery_low_charge_alarm_ = update.data.f;
+          PowerFeather::Board.setBatteryLowChargeAlarm(static_cast<uint8_t>(mainboard->battery_low_charge_alarm_));
           break;
 
         case TaskUpdateType::SENSORS:
@@ -241,6 +264,21 @@ namespace esphome
         CHECK_RES(PowerFeather::Board.getCharger().getChargeCurrentLimit(value));
         battery_charging_max_current_ = value;
         battery_charging_max_current_value_->publish_state(battery_charging_max_current_);
+      }
+
+      if (battery_low_voltage_alarm_value_)
+      {
+        battery_low_voltage_alarm_value_->publish_state(battery_low_voltage_alarm_);
+      }
+
+      if (battery_high_voltage_alarm_value_)
+      {
+        battery_high_voltage_alarm_value_->publish_state(battery_high_voltage_alarm_);
+      }
+
+      if (battery_low_charge_alarm_value_)
+      {
+        battery_low_charge_alarm_value_->publish_state(battery_low_charge_alarm_);
       }
 
       if (enable_battery_charging_switch_ && battery_capacity_)

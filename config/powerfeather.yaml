@@ -70,12 +70,20 @@ powerfeather:
         name: "Shutdown"
       powercycle:
         name: "Powercycle"
+      update_battery_fuel_gauge_temp:
+        name: "Update Battery Fuel Gauge Temperature"
 
     numbers:
       supply_maintain_voltage:
         name: "Supply Maintain Voltage"
       battery_charging_max_current:
         name: "Battery Charging Max Current"
+      battery_low_voltage_alarm:
+        name: "Battery Low Voltage Alarm"
+      battery_high_voltage_alarm:
+        name: "Battery High Voltage Alarm"
+      battery_low_charge_alarm:
+        name: "Battery Low Charge Alarm"
 
     switches:
       enable_3V3:

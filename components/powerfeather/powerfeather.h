@@ -33,10 +33,14 @@ namespace esphome
       ENABLE_BATTERY_CHARGING,
       ENABLE_STAT,
       POWERCYCLE,
+      UPDATE_BATTERY_FUEL_GAUGE_TEMP,
       SHIP_MODE,
       SHUTDOWN,
       SUPPLY_MAINTAIN_VOLTAGE,
       BATTERY_CHARGING_MAX_CURRENT,
+      BATTERY_LOW_VOLTAGE_ALARM,
+      BATTERY_HIGH_VOLTAGE_ALARM,
+      BATTERY_LOW_CHARGE_ALARM,
     };
 
     typedef struct
@@ -110,9 +114,16 @@ namespace esphome
       void set_ship_mode_button(button::Button *button) { ship_mode_button_ = button; }
       void set_shutdown_button(button::Button *button) { shutdown_button_ = button; }
       void set_powercycle_button(button::Button *button) { powercycle_button_ = button; }
+      void set_update_battery_fuel_gauge_temp_button(button::Button *button)
+      {
+        update_battery_fuel_gauge_temp_button_ = button;
+      }
 
       void set_supply_maintain_voltage_value(number::Number *value) { supply_maintain_voltage_value_ = value; }
       void set_battery_charging_max_current_value(number::Number *value) { battery_charging_max_current_value_ = value; }
+      void set_battery_low_voltage_alarm_value(number::Number *value) { battery_low_voltage_alarm_value_ = value; }
+      void set_battery_high_voltage_alarm_value(number::Number *value) { battery_high_voltage_alarm_value_ = value; }
+      void set_battery_low_charge_alarm_value(number::Number *value) { battery_low_charge_alarm_value_ = value; }
 
       void send_task_update(TaskUpdate update);
 
@@ -143,6 +154,9 @@ namespace esphome
       float battery_temperature_{NAN};
       float battery_charging_max_current_{NAN};
       float supply_maintain_voltage_{NAN};
+      float battery_low_voltage_alarm_{0.0f};
+      float battery_high_voltage_alarm_{0.0f};
+      float battery_low_charge_alarm_{0.0f};
 
       QueueHandle_t update_task_queue_ = NULL;
 
@@ -166,8 +180,12 @@ namespace esphome
       button::Button *ship_mode_button_{nullptr};
       button::Button *shutdown_button_{nullptr};
       button::Button *powercycle_button_{nullptr};
+      button::Button *update_battery_fuel_gauge_temp_button_{nullptr};
       number::Number *supply_maintain_voltage_value_{nullptr};
       number::Number *battery_charging_max_current_value_{nullptr};
+      number::Number *battery_low_voltage_alarm_value_{nullptr};
+      number::Number *battery_high_voltage_alarm_value_{nullptr};
+      number::Number *battery_low_charge_alarm_value_{nullptr};
 
       static void update_task_(void *param);
       void update_sensors_();

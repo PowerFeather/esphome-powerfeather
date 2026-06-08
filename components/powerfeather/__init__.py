@@ -7,7 +7,6 @@ from esphome.const import (
     CONF_UPDATE_INTERVAL,
     DEVICE_CLASS_BATTERY,
     DEVICE_CLASS_CURRENT,
-    DEVICE_CLASS_DURATION,
     DEVICE_CLASS_POWER,
     DEVICE_CLASS_RESTART,
     DEVICE_CLASS_SWITCH,
@@ -39,6 +38,7 @@ ICON_VOLTAGE = "mdi:sine-wave"
 UNIT_MILLIAMPERE = "mA"
 UNIT_MINUTES = "min"
 UNIT_VOLT = "V"
+STATE_CLASS_TOTAL_INCREASING = "total_increasing"
 
 CODEOWNERS = ["powerfeatherdev (dev@powerfeather.dev)"]
 AUTO_LOAD = ["sensor", "binary_sensor", "switch", "button", "number"]
@@ -66,8 +66,12 @@ CONF_SUPPLY_GOOD = "supply_good"
 CONF_SHIP_MODE = "ship_mode"
 CONF_SHUTDOWN = "shutdown"
 CONF_POWER_CYCLE = "powercycle"
+CONF_UPDATE_BATTERY_FUEL_GAUGE_TEMP = "update_battery_fuel_gauge_temp"
 CONF_SUPPLY_MAINTAIN_VOLTAGE = "supply_maintain_voltage"
 CONF_BATTERY_CHARGING_MAX_CURRENT = "battery_charging_max_current"
+CONF_BATTERY_LOW_VOLTAGE_ALARM = "battery_low_voltage_alarm"
+CONF_BATTERY_HIGH_VOLTAGE_ALARM = "battery_high_voltage_alarm"
+CONF_BATTERY_LOW_CHARGE_ALARM = "battery_low_charge_alarm"
 CONF_ENABLE_EN = "enable_EN"
 CONF_ENABLE_3V3 = "enable_3V3"
 CONF_ENABLE_VSQT = "enable_VSQT"
@@ -88,6 +92,13 @@ SUPPLY_MAINTAIN_VOLTAGE_STEP = 0.012
 BATTERY_CHARGING_CURRENT_MIN = 40
 BATTERY_CHARGING_CURRENT_MAX = 2000
 BATTERY_CHARGING_CURRENT_STEP = 4
+BATTERY_ALARM_VOLTAGE_MIN = 0
+BATTERY_ALARM_VOLTAGE_MAX_V1 = 5.0
+BATTERY_ALARM_VOLTAGE_MAX_V2 = 5.1
+BATTERY_ALARM_VOLTAGE_STEP = 0.01
+BATTERY_ALARM_CHARGE_MIN = 0
+BATTERY_ALARM_CHARGE_MAX = 100
+BATTERY_ALARM_CHARGE_STEP = 1
 
 BOARD_REVISION_V1 = "v1"
 BOARD_REVISION_V2 = "v2"
@@ -125,8 +136,12 @@ TASK_UPDATE_TYPES = {
     "SHIP_MODE": TaskUpdateType.SHIP_MODE,
     "SHUTDOWN": TaskUpdateType.SHUTDOWN,
     "POWERCYCLE": TaskUpdateType.POWERCYCLE,
+    "UPDATE_BATTERY_FUEL_GAUGE_TEMP": TaskUpdateType.UPDATE_BATTERY_FUEL_GAUGE_TEMP,
     "SUPPLY_MAINTAIN_VOLTAGE": TaskUpdateType.SUPPLY_MAINTAIN_VOLTAGE,
     "BATTERY_CHARGING_MAX_CURRENT": TaskUpdateType.BATTERY_CHARGING_MAX_CURRENT,
+    "BATTERY_LOW_VOLTAGE_ALARM": TaskUpdateType.BATTERY_LOW_VOLTAGE_ALARM,
+    "BATTERY_HIGH_VOLTAGE_ALARM": TaskUpdateType.BATTERY_HIGH_VOLTAGE_ALARM,
+    "BATTERY_LOW_CHARGE_ALARM": TaskUpdateType.BATTERY_LOW_CHARGE_ALARM,
 }
 
 
@@ -189,12 +204,11 @@ SENSORS_SCHEMA = cv.Schema(
         cv.Optional(CONF_BATTERY_CYCLES): sensor.sensor_schema(
             unit_of_measurement=UNIT_EMPTY,
             icon=ICON_EMPTY,
-            state_class=STATE_CLASS_MEASUREMENT,
+            state_class=STATE_CLASS_TOTAL_INCREASING,
         ),
         cv.Optional(CONF_BATTERY_TIME_LEFT): sensor.sensor_schema(
             unit_of_measurement=UNIT_MINUTES,
             icon=ICON_TIMER,
-            device_class=DEVICE_CLASS_DURATION,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
         cv.Optional(CONF_BATTERY_TEMPERATURE): sensor.sensor_schema(
@@ -223,6 +237,10 @@ BUTTONS_SCHEMA = cv.Schema(
             icon=ICON_RESTART,
             device_class=DEVICE_CLASS_RESTART,
         ),
+        cv.Optional(CONF_UPDATE_BATTERY_FUEL_GAUGE_TEMP): button.button_schema(
+            PowerFeatherButton,
+            icon=ICON_THERMOMETER,
+        ),
     }
 )
 
@@ -239,6 +257,24 @@ NUMBERS_SCHEMA = cv.Schema(
             icon=ICON_CURRENT_DC,
             unit_of_measurement=UNIT_MILLIAMPERE,
             device_class=DEVICE_CLASS_CURRENT,
+        ),
+        cv.Optional(CONF_BATTERY_LOW_VOLTAGE_ALARM): number.number_schema(
+            PowerFeatherValue,
+            icon=ICON_VOLTAGE,
+            unit_of_measurement=UNIT_VOLT,
+            device_class=DEVICE_CLASS_VOLTAGE,
+        ),
+        cv.Optional(CONF_BATTERY_HIGH_VOLTAGE_ALARM): number.number_schema(
+            PowerFeatherValue,
+            icon=ICON_VOLTAGE,
+            unit_of_measurement=UNIT_VOLT,
+            device_class=DEVICE_CLASS_VOLTAGE,
+        ),
+        cv.Optional(CONF_BATTERY_LOW_CHARGE_ALARM): number.number_schema(
+            PowerFeatherValue,
+            icon=ICON_BATTERY,
+            unit_of_measurement=UNIT_PERCENT,
+            device_class=DEVICE_CLASS_BATTERY,
         ),
     }
 )
@@ -418,8 +454,20 @@ async def to_code(config):
         await _add_button(mainboard, buttons, CONF_SHIP_MODE, "SHIP_MODE", "set_ship_mode_button")
         await _add_button(mainboard, buttons, CONF_SHUTDOWN, "SHUTDOWN", "set_shutdown_button")
         await _add_button(mainboard, buttons, CONF_POWER_CYCLE, "POWERCYCLE", "set_powercycle_button")
+        await _add_button(
+            mainboard,
+            buttons,
+            CONF_UPDATE_BATTERY_FUEL_GAUGE_TEMP,
+            "UPDATE_BATTERY_FUEL_GAUGE_TEMP",
+            "set_update_battery_fuel_gauge_temp_button",
+        )
 
         numbers = mainboard_config[CONF_NUMBERS]
+        battery_alarm_voltage_max = (
+            BATTERY_ALARM_VOLTAGE_MAX_V2
+            if mainboard_config[CONF_BOARD_REVISION] == BOARD_REVISION_V2
+            else BATTERY_ALARM_VOLTAGE_MAX_V1
+        )
         await _add_number(
             mainboard,
             numbers,
@@ -439,6 +487,36 @@ async def to_code(config):
             BATTERY_CHARGING_CURRENT_MIN,
             BATTERY_CHARGING_CURRENT_MAX,
             BATTERY_CHARGING_CURRENT_STEP,
+        )
+        await _add_number(
+            mainboard,
+            numbers,
+            CONF_BATTERY_LOW_VOLTAGE_ALARM,
+            "BATTERY_LOW_VOLTAGE_ALARM",
+            "set_battery_low_voltage_alarm_value",
+            BATTERY_ALARM_VOLTAGE_MIN,
+            battery_alarm_voltage_max,
+            BATTERY_ALARM_VOLTAGE_STEP,
+        )
+        await _add_number(
+            mainboard,
+            numbers,
+            CONF_BATTERY_HIGH_VOLTAGE_ALARM,
+            "BATTERY_HIGH_VOLTAGE_ALARM",
+            "set_battery_high_voltage_alarm_value",
+            BATTERY_ALARM_VOLTAGE_MIN,
+            battery_alarm_voltage_max,
+            BATTERY_ALARM_VOLTAGE_STEP,
+        )
+        await _add_number(
+            mainboard,
+            numbers,
+            CONF_BATTERY_LOW_CHARGE_ALARM,
+            "BATTERY_LOW_CHARGE_ALARM",
+            "set_battery_low_charge_alarm_value",
+            BATTERY_ALARM_CHARGE_MIN,
+            BATTERY_ALARM_CHARGE_MAX,
+            BATTERY_ALARM_CHARGE_STEP,
         )
 
         switches = mainboard_config[CONF_SWITCHES]
