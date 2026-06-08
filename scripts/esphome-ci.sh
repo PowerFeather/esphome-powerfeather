@@ -18,6 +18,8 @@ make_config() {
   local framework="$3"
   local revision="$4"
   local battery_type="${5:-Generic_3V7}"
+  local capacity="${6:-1000}"
+  local update_interval="${7:-5s}"
 
   mkdir -p "$config_dir"
   cp "$ROOT_DIR/config/powerfeather.yaml" "$config_dir/$output_name"
@@ -27,6 +29,8 @@ make_config() {
     -e "s/type: esp-idf/type: ${framework}/;" \
     -e "s/board_revision: v2/board_revision: ${revision}/;" \
     -e "s/type: \"Generic_3V7\"/type: \"${battery_type}\"/;" \
+    -e "s/capacity: 1000/capacity: ${capacity}/;" \
+    -e "s/update_interval: 5s/update_interval: ${update_interval}/;" \
     "$config_dir/$output_name"
 }
 
@@ -51,13 +55,15 @@ run_config_expect_pass() {
   local framework="$2"
   local revision="$3"
   local battery_type="$4"
+  local capacity="${5:-1000}"
+  local update_interval="${6:-5s}"
   local tmp_dir
   local log_file
   local status
   tmp_dir="$(mktemp -d)"
   log_file="$tmp_dir/output.log"
 
-  make_config "$tmp_dir" "$name.yaml" "$framework" "$revision" "$battery_type"
+  make_config "$tmp_dir" "$name.yaml" "$framework" "$revision" "$battery_type" "$capacity" "$update_interval"
   set +e
   docker_esphome "$tmp_dir" config "$name.yaml" >"$log_file" 2>&1
   status=$?
@@ -78,12 +84,14 @@ run_config_expect_fail() {
   local revision="$3"
   local battery_type="$4"
   local expected="$5"
+  local capacity="${6:-1000}"
+  local update_interval="${7:-5s}"
   local tmp_dir
   local log_file
   tmp_dir="$(mktemp -d)"
   log_file="$tmp_dir/output.log"
 
-  make_config "$tmp_dir" "$name.yaml" "$framework" "$revision" "$battery_type"
+  make_config "$tmp_dir" "$name.yaml" "$framework" "$revision" "$battery_type" "$capacity" "$update_interval"
   if docker_esphome "$tmp_dir" config "$name.yaml" >"$log_file" 2>&1; then
     printf 'Expected config case %s to fail, but it passed.\n' "$name" >&2
     cat "$log_file" >&2
@@ -109,6 +117,21 @@ validate() {
   run_config_expect_pass "powerfeather-v2-generic" "esp-idf" "v2" "Generic_3V7"
   run_config_expect_pass "powerfeather-v2-lfp" "esp-idf" "v2" "Generic_LFP"
   run_config_expect_fail "powerfeather-v1-lfp" "esp-idf" "v1" "Generic_LFP" "Generic_LFP battery type requires board_revision v2"
+  run_config_expect_fail \
+    "powerfeather-v1-small-battery" \
+    "esp-idf" \
+    "v1" \
+    "Generic_3V7" \
+    "battery capacity for board_revision v1 must be 0 or between 50 and 6000 mAh" \
+    "1"
+  run_config_expect_fail \
+    "powerfeather-fast-update" \
+    "esp-idf" \
+    "v2" \
+    "Generic_3V7" \
+    "Update interval must be at least 500ms" \
+    "1000" \
+    "100ms"
 }
 
 compile_one() {
