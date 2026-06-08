@@ -2,7 +2,7 @@
 
 ESPHome external components for integrating PowerFeather functionality in HomeAssistant.
 
-Currently only the component `powerfeather_mainboard` is available, which gives
+Currently only the `powerfeather.mainboard` component is available, which gives
 easy access to a PowerFeather mainboard's power monitoring and management functions.
 
 See documentation at https://docs.powerfeather.dev/guides/create_esphome_device/

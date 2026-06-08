@@ -1,6 +1,6 @@
 
 #include "esphome/core/log.h"
-#include "powerfeather_mainboard.h"
+#include "powerfeather.h"
 
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -8,9 +8,9 @@
 
 namespace esphome
 {
-  namespace powerfeather_mainboard
+  namespace powerfeather
   {
-    static const char *TAG = "mainboard";
+    static const char *TAG = "powerfeather.mainboard";
 
     static uint32_t millis()
     {
@@ -92,54 +92,54 @@ namespace esphome
 
     void PowerFeatherMainboard::update_task_(void *param)
     {
-      powerfeather_mainboard::PowerFeatherMainboard *powerfeather_mainboard =
-        reinterpret_cast<powerfeather_mainboard::PowerFeatherMainboard *>(param);
+      powerfeather::PowerFeatherMainboard *mainboard =
+        reinterpret_cast<powerfeather::PowerFeatherMainboard *>(param);
 
       while (true)
       {
         TaskUpdate update;
         update.type = TaskUpdateType::SENSORS;
-        xQueueReceive(powerfeather_mainboard->update_task_queue_, &update, portMAX_DELAY);
+        xQueueReceive(mainboard->update_task_queue_, &update, portMAX_DELAY);
         switch (update.type)
         {
         case TaskUpdateType::ENABLE_EN:
-          PowerFeather::Board.setEN(powerfeather_mainboard->enable_EN_);
+          PowerFeather::Board.setEN(mainboard->enable_EN_);
           break;
 
         case TaskUpdateType::ENABLE_3V3:
           ESP_LOGD(TAG, "Recieved EN enable state: %d", update.data.b);
-          powerfeather_mainboard->enable_3V3_ = update.data.b;
-          PowerFeather::Board.enable3V3(powerfeather_mainboard->enable_3V3_);
+          mainboard->enable_3V3_ = update.data.b;
+          PowerFeather::Board.enable3V3(mainboard->enable_3V3_);
           break;
 
         case TaskUpdateType::ENABLE_VSQT:
           ESP_LOGD(TAG, "Recieved VSQT enable state: %d", update.data.b);
-          powerfeather_mainboard->enable_VSQT_ = update.data.b;
-          PowerFeather::Board.enableVSQT(powerfeather_mainboard->enable_VSQT_);
+          mainboard->enable_VSQT_ = update.data.b;
+          PowerFeather::Board.enableVSQT(mainboard->enable_VSQT_);
           break;
 
         case TaskUpdateType::ENABLE_BATTERY_TEMP_SENSE:
           ESP_LOGD(TAG, "Recieved enable battery temp sense: %d", update.data.b);
-          powerfeather_mainboard->enable_battery_temp_sense_ = update.data.b;
-          PowerFeather::Board.enableBatteryTempSense(powerfeather_mainboard->enable_battery_temp_sense_);
+          mainboard->enable_battery_temp_sense_ = update.data.b;
+          PowerFeather::Board.enableBatteryTempSense(mainboard->enable_battery_temp_sense_);
           break;
 
         case TaskUpdateType::ENABLE_BATTERY_FUEL_GAUGE:
           ESP_LOGD(TAG, "Recieved enable battery fuel gauge: %d", update.data.b);
-          powerfeather_mainboard->enable_battery_fuel_gauge_ = update.data.b;
-          PowerFeather::Board.enableBatteryFuelGauge(powerfeather_mainboard->enable_battery_fuel_gauge_);
+          mainboard->enable_battery_fuel_gauge_ = update.data.b;
+          PowerFeather::Board.enableBatteryFuelGauge(mainboard->enable_battery_fuel_gauge_);
           break;
 
         case TaskUpdateType::ENABLE_BATTERY_CHARGING:
           ESP_LOGD(TAG, "Recieved enable battery charging: %d", update.data.b);
-          powerfeather_mainboard->enable_battery_charging_ = update.data.b;
-          PowerFeather::Board.enableBatteryCharging(powerfeather_mainboard->enable_battery_charging_);
+          mainboard->enable_battery_charging_ = update.data.b;
+          PowerFeather::Board.enableBatteryCharging(mainboard->enable_battery_charging_);
           break;
 
         case TaskUpdateType::ENABLE_STAT:
           ESP_LOGD(TAG, "Recieved enable STAT LED: %d", update.data.b);
-          powerfeather_mainboard->enable_stat_ = update.data.b;
-          PowerFeather::Board.enableSTAT(powerfeather_mainboard->enable_stat_);
+          mainboard->enable_stat_ = update.data.b;
+          PowerFeather::Board.enableSTAT(mainboard->enable_stat_);
           break;
 
         case TaskUpdateType::POWERCYCLE:
@@ -159,21 +159,21 @@ namespace esphome
 
         case TaskUpdateType::SUPPLY_MAINTAIN_VOLTAGE:
           ESP_LOGD(TAG, "Recieved supply maintain voltage value update: %f", update.data.f);
-          powerfeather_mainboard->supply_maintain_voltage_ = update.data.f;
-          PowerFeather::Board.setSupplyMaintainVoltage(powerfeather_mainboard->supply_maintain_voltage_);
+          mainboard->supply_maintain_voltage_ = update.data.f;
+          PowerFeather::Board.setSupplyMaintainVoltage(mainboard->supply_maintain_voltage_);
           break;
 
         case TaskUpdateType::BATTERY_CHARGING_MAX_CURRENT:
           ESP_LOGD(TAG, "Recieved battery charging max current update: %f", update.data.f);
-          powerfeather_mainboard->battery_charging_max_current_ = update.data.f;
-          PowerFeather::Board.setBatteryChargingMaxCurrent(powerfeather_mainboard->battery_charging_max_current_);
+          mainboard->battery_charging_max_current_ = update.data.f;
+          PowerFeather::Board.setBatteryChargingMaxCurrent(mainboard->battery_charging_max_current_);
           break;
 
         case TaskUpdateType::SENSORS:
         default:
         {
           ESP_LOGD(TAG, "Recieved sensors update request");
-          powerfeather_mainboard->update_sensors_();
+          mainboard->update_sensors_();
         }
         break;
         }
@@ -274,7 +274,7 @@ namespace esphome
         return;
       }
 
-      if (xTaskCreate(update_task_, "powerfeather_mainboard", UPDATE_TASK_STACK_SIZE_, this, uxTaskPriorityGet(NULL), NULL) != pdTRUE)
+      if (xTaskCreate(update_task_, "powerfeather", UPDATE_TASK_STACK_SIZE_, this, uxTaskPriorityGet(NULL), NULL) != pdTRUE)
       {
         ESP_LOGE(TAG, "Failed to create PowerFeather task queue");
         mark_failed();
@@ -379,5 +379,5 @@ namespace esphome
       xQueueSend(update_task_queue_, &update, portMAX_DELAY);
     }
 
-  } // namespace empty_compound_sensor
+  } // namespace powerfeather
 } // namespace esphome

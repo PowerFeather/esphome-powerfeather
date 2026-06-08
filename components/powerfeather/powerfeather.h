@@ -12,7 +12,7 @@
 
 namespace esphome
 {
-  namespace powerfeather_mainboard
+  namespace powerfeather
   {
     enum BatteryType
     {
@@ -175,5 +175,51 @@ namespace esphome
       uint32_t sensors_publish_time_ = 0;
       bool sensors_updated_ = false;
     };
-  } // namespace empty_compound_sensor
+
+    class PowerFeatherButton : public button::Button, public Parented<PowerFeatherMainboard>, public PowerFeatherUpdateable
+    {
+    public:
+      PowerFeatherButton() = default;
+
+    protected:
+      void press_action() override
+      {
+        TaskUpdate update;
+        update.type = type_;
+        this->parent_->send_task_update(update);
+      }
+    };
+
+    class PowerFeatherValue : public number::Number, public Parented<PowerFeatherMainboard>, public PowerFeatherUpdateable
+    {
+    public:
+      PowerFeatherValue() = default;
+
+    protected:
+      void control(float value) override
+      {
+        TaskUpdate update;
+        update.type = type_;
+        update.data.f = value;
+        this->parent_->send_task_update(update);
+        this->publish_state(value);
+      }
+    };
+
+    class PowerFeatherSwitch : public switch_::Switch, public Parented<PowerFeatherMainboard>, public PowerFeatherUpdateable
+    {
+    public:
+      PowerFeatherSwitch() = default;
+
+    protected:
+      void write_state(bool state) override
+      {
+        TaskUpdate update;
+        update.type = type_;
+        update.data.b = state;
+        this->parent_->send_task_update(update);
+        this->publish_state(state);
+      }
+    };
+  } // namespace powerfeather
 } // namespace esphome

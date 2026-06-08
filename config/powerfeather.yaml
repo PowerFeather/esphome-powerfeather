@@ -30,74 +30,66 @@ external_components:
       path: ../components
     refresh: 0s
 
-powerfeather_mainboard:
-  board_revision: v2
-  battery_capacity: 1000
-  battery_type: "Generic_3V7"
-  id: "my_powerfeather"
-  update_interval: 5s # applies to all types of sensor under this component
+powerfeather:
+  mainboard:
+    id: "my_powerfeather"
+    board_revision: v2
+    battery:
+      capacity: 1000
+      type: "Generic_3V7"
+    update_interval: 5s # applies to all types of sensor under this component
 
-sensor:
-  - platform: "powerfeather_mainboard"
-    mainboard_id: "my_powerfeather"
-    supply_voltage:
-      name: "Supply Voltage"
-    supply_current:
-      name: "Supply Current"
-    battery_voltage:
-      name: "Battery Voltage"
-    battery_current:
-      name: "Battery Current"
-    battery_charge:
-      name: "Battery Charge"
-    battery_health:
-      name: "Battery Health"
-    battery_cycles:
-      name: "Battery Cycles"
-    battery_time_left:
-      name: "Battery Time Left"
-    battery_temperature:
-      name: "Battery Temperature"
+    sensors:
+      supply_voltage:
+        name: "Supply Voltage"
+      supply_current:
+        name: "Supply Current"
+      battery_voltage:
+        name: "Battery Voltage"
+      battery_current:
+        name: "Battery Current"
+      battery_charge:
+        name: "Battery Charge"
+      battery_health:
+        name: "Battery Health"
+      battery_cycles:
+        name: "Battery Cycles"
+      battery_time_left:
+        name: "Battery Time Left"
+      battery_temperature:
+        name: "Battery Temperature"
 
-binary_sensor:
-  - platform: "powerfeather_mainboard"
-    mainboard_id: "my_powerfeather"
-    supply_good:
-      name: "Supply Good"
+    binary_sensors:
+      supply_good:
+        name: "Supply Good"
 
-button:
-  - platform: "powerfeather_mainboard"
-    mainboard_id: "my_powerfeather"
-    ship_mode:
-      name: "Ship Mode"
-    shutdown:
-      name: "Shutdown"
-    powercycle:
-      name: "Powercycle"
+    buttons:
+      ship_mode:
+        name: "Ship Mode"
+      shutdown:
+        name: "Shutdown"
+      powercycle:
+        name: "Powercycle"
 
-number:
-  - platform: "powerfeather_mainboard"
-    mainboard_id: "my_powerfeather"
-    supply_maintain_voltage:
-      name: "Supply Maintain Voltage"
-    battery_charging_max_current:
-      name: "Battery Charging Max Current"
+    numbers:
+      supply_maintain_voltage:
+        name: "Supply Maintain Voltage"
+      battery_charging_max_current:
+        name: "Battery Charging Max Current"
 
-switch:
-  - platform: "powerfeather_mainboard"
-    mainboard_id: "my_powerfeather"
-    enable_3V3:
-      name: "Enable 3V3"
-    enable_VSQT:
-      name: "Enable VSQT"
-    enable_battery_temp_sense:
-      name: "Enable Battery Temperature Sense"
-    enable_battery_charging:
-      name: "Enable Battery Charging"
-    enable_battery_fuel_gauge:
-      name: "Enable Battery Fuel Gauge"
-    enable_stat:
-      name: "Enable STAT LED"
+    switches:
+      enable_3V3:
+        name: "Enable 3V3"
+      enable_VSQT:
+        name: "Enable VSQT"
+      enable_battery_temp_sense:
+        name: "Enable Battery Temperature Sense"
+      enable_battery_charging:
+        name: "Enable Battery Charging"
+      enable_battery_fuel_gauge:
+        name: "Enable Battery Fuel Gauge"
+      enable_stat:
+        name: "Enable STAT LED"
 
 
 web_server:
