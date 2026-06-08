@@ -366,7 +366,7 @@ MAINBOARD_SCHEMA = cv.All(
 
 CONFIG_SCHEMA = cv.Schema(
     {
-        cv.Required(CONF_MAINBOARD): cv.ensure_list(MAINBOARD_SCHEMA),
+        cv.Required(CONF_MAINBOARD): MAINBOARD_SCHEMA,
     }
 )
 
@@ -423,125 +423,126 @@ async def to_code(config):
     if CORE.using_arduino:
         cg.add_build_flag("-DARDUINO_ESP32S3_POWERFEATHER")
 
-    if any(item[CONF_BOARD_REVISION] == BOARD_REVISION_V2 for item in config[CONF_MAINBOARD]):
+    mainboard_config = config[CONF_MAINBOARD]
+
+    if mainboard_config[CONF_BOARD_REVISION] == BOARD_REVISION_V2:
         cg.add_build_flag("-DPOWERFEATHER_BOARD_V2")
         if not CORE.using_arduino and add_idf_sdkconfig_option is not None:
             add_idf_sdkconfig_option("CONFIG_ESP32S3_POWERFEATHER_V2", True)
 
-    for mainboard_config in config[CONF_MAINBOARD]:
-        mainboard = cg.new_Pvariable(mainboard_config[CONF_ID])
-        await cg.register_component(mainboard, mainboard_config)
+    mainboard = cg.new_Pvariable(mainboard_config[CONF_ID])
+    await cg.register_component(mainboard, mainboard_config)
 
-        battery = mainboard_config[CONF_BATTERY]
-        cg.add(mainboard.set_battery_capacity(battery[CONF_CAPACITY]))
-        cg.add(mainboard.set_battery_type(BATTERY_TYPES[battery[CONF_TYPE]]))
+    battery = mainboard_config[CONF_BATTERY]
+    cg.add(mainboard.set_battery_capacity(battery[CONF_CAPACITY]))
+    cg.add(mainboard.set_battery_type(BATTERY_TYPES[battery[CONF_TYPE]]))
 
-        sensors = mainboard_config[CONF_SENSORS]
-        await _add_sensor(mainboard, sensors, CONF_SUPPLY_VOLTAGE, "set_supply_voltage_sensor")
-        await _add_sensor(mainboard, sensors, CONF_SUPPLY_CURRENT, "set_supply_current_sensor")
-        await _add_sensor(mainboard, sensors, CONF_BATTERY_VOLTAGE, "set_battery_voltage_sensor")
-        await _add_sensor(mainboard, sensors, CONF_BATTERY_CURRENT, "set_battery_current_sensor")
-        await _add_sensor(mainboard, sensors, CONF_BATTERY_CHARGE, "set_battery_charge_sensor")
-        await _add_sensor(mainboard, sensors, CONF_BATTERY_HEALTH, "set_battery_health_sensor")
-        await _add_sensor(mainboard, sensors, CONF_BATTERY_CYCLES, "set_battery_cycles_sensor")
-        await _add_sensor(mainboard, sensors, CONF_BATTERY_TIME_LEFT, "set_battery_time_left_sensor")
-        await _add_sensor(mainboard, sensors, CONF_BATTERY_TEMPERATURE, "set_battery_temperature_sensor")
+    sensors = mainboard_config[CONF_SENSORS]
+    await _add_sensor(mainboard, sensors, CONF_SUPPLY_VOLTAGE, "set_supply_voltage_sensor")
+    await _add_sensor(mainboard, sensors, CONF_SUPPLY_CURRENT, "set_supply_current_sensor")
+    await _add_sensor(mainboard, sensors, CONF_BATTERY_VOLTAGE, "set_battery_voltage_sensor")
+    await _add_sensor(mainboard, sensors, CONF_BATTERY_CURRENT, "set_battery_current_sensor")
+    await _add_sensor(mainboard, sensors, CONF_BATTERY_CHARGE, "set_battery_charge_sensor")
+    await _add_sensor(mainboard, sensors, CONF_BATTERY_HEALTH, "set_battery_health_sensor")
+    await _add_sensor(mainboard, sensors, CONF_BATTERY_CYCLES, "set_battery_cycles_sensor")
+    await _add_sensor(mainboard, sensors, CONF_BATTERY_TIME_LEFT, "set_battery_time_left_sensor")
+    await _add_sensor(mainboard, sensors, CONF_BATTERY_TEMPERATURE, "set_battery_temperature_sensor")
 
-        binary_sensors = mainboard_config[CONF_BINARY_SENSORS]
-        await _add_binary_sensor(mainboard, binary_sensors, CONF_SUPPLY_GOOD, "set_supply_good_sensor")
+    binary_sensors = mainboard_config[CONF_BINARY_SENSORS]
+    await _add_binary_sensor(mainboard, binary_sensors, CONF_SUPPLY_GOOD, "set_supply_good_sensor")
 
-        buttons = mainboard_config[CONF_BUTTONS]
-        await _add_button(mainboard, buttons, CONF_SHIP_MODE, "SHIP_MODE", "set_ship_mode_button")
-        await _add_button(mainboard, buttons, CONF_SHUTDOWN, "SHUTDOWN", "set_shutdown_button")
-        await _add_button(mainboard, buttons, CONF_POWER_CYCLE, "POWERCYCLE", "set_powercycle_button")
-        await _add_button(
-            mainboard,
-            buttons,
-            CONF_UPDATE_BATTERY_FUEL_GAUGE_TEMP,
-            "UPDATE_BATTERY_FUEL_GAUGE_TEMP",
-            "set_update_battery_fuel_gauge_temp_button",
-        )
+    buttons = mainboard_config[CONF_BUTTONS]
+    await _add_button(mainboard, buttons, CONF_SHIP_MODE, "SHIP_MODE", "set_ship_mode_button")
+    await _add_button(mainboard, buttons, CONF_SHUTDOWN, "SHUTDOWN", "set_shutdown_button")
+    await _add_button(mainboard, buttons, CONF_POWER_CYCLE, "POWERCYCLE", "set_powercycle_button")
+    await _add_button(
+        mainboard,
+        buttons,
+        CONF_UPDATE_BATTERY_FUEL_GAUGE_TEMP,
+        "UPDATE_BATTERY_FUEL_GAUGE_TEMP",
+        "set_update_battery_fuel_gauge_temp_button",
+    )
 
-        numbers = mainboard_config[CONF_NUMBERS]
-        battery_alarm_voltage_max = (
-            BATTERY_ALARM_VOLTAGE_MAX_V2
-            if mainboard_config[CONF_BOARD_REVISION] == BOARD_REVISION_V2
-            else BATTERY_ALARM_VOLTAGE_MAX_V1
-        )
-        await _add_number(
-            mainboard,
-            numbers,
-            CONF_SUPPLY_MAINTAIN_VOLTAGE,
-            "SUPPLY_MAINTAIN_VOLTAGE",
-            "set_supply_maintain_voltage_value",
-            SUPPLY_MAINTAIN_VOLTAGE_MIN,
-            SUPPLY_MAINTAIN_VOLTAGE_MAX,
-            SUPPLY_MAINTAIN_VOLTAGE_STEP,
-        )
-        await _add_number(
-            mainboard,
-            numbers,
-            CONF_BATTERY_CHARGING_MAX_CURRENT,
-            "BATTERY_CHARGING_MAX_CURRENT",
-            "set_battery_charging_max_current_value",
-            BATTERY_CHARGING_CURRENT_MIN,
-            BATTERY_CHARGING_CURRENT_MAX,
-            BATTERY_CHARGING_CURRENT_STEP,
-        )
-        await _add_number(
-            mainboard,
-            numbers,
-            CONF_BATTERY_LOW_VOLTAGE_ALARM,
-            "BATTERY_LOW_VOLTAGE_ALARM",
-            "set_battery_low_voltage_alarm_value",
-            BATTERY_ALARM_VOLTAGE_MIN,
-            battery_alarm_voltage_max,
-            BATTERY_ALARM_VOLTAGE_STEP,
-        )
-        await _add_number(
-            mainboard,
-            numbers,
-            CONF_BATTERY_HIGH_VOLTAGE_ALARM,
-            "BATTERY_HIGH_VOLTAGE_ALARM",
-            "set_battery_high_voltage_alarm_value",
-            BATTERY_ALARM_VOLTAGE_MIN,
-            battery_alarm_voltage_max,
-            BATTERY_ALARM_VOLTAGE_STEP,
-        )
-        await _add_number(
-            mainboard,
-            numbers,
-            CONF_BATTERY_LOW_CHARGE_ALARM,
-            "BATTERY_LOW_CHARGE_ALARM",
-            "set_battery_low_charge_alarm_value",
-            BATTERY_ALARM_CHARGE_MIN,
-            BATTERY_ALARM_CHARGE_MAX,
-            BATTERY_ALARM_CHARGE_STEP,
-        )
+    numbers = mainboard_config[CONF_NUMBERS]
+    battery_alarm_voltage_max = (
+        BATTERY_ALARM_VOLTAGE_MAX_V2
+        if mainboard_config[CONF_BOARD_REVISION] == BOARD_REVISION_V2
+        else BATTERY_ALARM_VOLTAGE_MAX_V1
+    )
+    await _add_number(
+        mainboard,
+        numbers,
+        CONF_SUPPLY_MAINTAIN_VOLTAGE,
+        "SUPPLY_MAINTAIN_VOLTAGE",
+        "set_supply_maintain_voltage_value",
+        SUPPLY_MAINTAIN_VOLTAGE_MIN,
+        SUPPLY_MAINTAIN_VOLTAGE_MAX,
+        SUPPLY_MAINTAIN_VOLTAGE_STEP,
+    )
+    await _add_number(
+        mainboard,
+        numbers,
+        CONF_BATTERY_CHARGING_MAX_CURRENT,
+        "BATTERY_CHARGING_MAX_CURRENT",
+        "set_battery_charging_max_current_value",
+        BATTERY_CHARGING_CURRENT_MIN,
+        BATTERY_CHARGING_CURRENT_MAX,
+        BATTERY_CHARGING_CURRENT_STEP,
+    )
+    await _add_number(
+        mainboard,
+        numbers,
+        CONF_BATTERY_LOW_VOLTAGE_ALARM,
+        "BATTERY_LOW_VOLTAGE_ALARM",
+        "set_battery_low_voltage_alarm_value",
+        BATTERY_ALARM_VOLTAGE_MIN,
+        battery_alarm_voltage_max,
+        BATTERY_ALARM_VOLTAGE_STEP,
+    )
+    await _add_number(
+        mainboard,
+        numbers,
+        CONF_BATTERY_HIGH_VOLTAGE_ALARM,
+        "BATTERY_HIGH_VOLTAGE_ALARM",
+        "set_battery_high_voltage_alarm_value",
+        BATTERY_ALARM_VOLTAGE_MIN,
+        battery_alarm_voltage_max,
+        BATTERY_ALARM_VOLTAGE_STEP,
+    )
+    await _add_number(
+        mainboard,
+        numbers,
+        CONF_BATTERY_LOW_CHARGE_ALARM,
+        "BATTERY_LOW_CHARGE_ALARM",
+        "set_battery_low_charge_alarm_value",
+        BATTERY_ALARM_CHARGE_MIN,
+        BATTERY_ALARM_CHARGE_MAX,
+        BATTERY_ALARM_CHARGE_STEP,
+    )
 
-        switches = mainboard_config[CONF_SWITCHES]
-        await _add_switch(mainboard, switches, CONF_ENABLE_EN, "ENABLE_EN", "set_enable_EN_switch")
-        await _add_switch(mainboard, switches, CONF_ENABLE_3V3, "ENABLE_3V3", "set_enable_3V3_switch")
-        await _add_switch(mainboard, switches, CONF_ENABLE_VSQT, "ENABLE_VSQT", "set_enable_VSQT_switch")
-        await _add_switch(
-            mainboard,
-            switches,
-            CONF_ENABLE_BATTERY_TEMP_SENSE,
-            "ENABLE_BATTERY_TEMP_SENSE",
-            "set_enable_battery_temp_sense_switch",
-        )
-        await _add_switch(
-            mainboard,
-            switches,
-            CONF_ENABLE_BATTERY_CHARGING,
-            "ENABLE_BATTERY_CHARGING",
-            "set_enable_battery_charging_switch",
-        )
-        await _add_switch(
-            mainboard,
-            switches,
-            CONF_ENABLE_BATTERY_FUEL_GAUGE,
-            "ENABLE_BATTERY_FUEL_GAUGE",
-            "set_enable_battery_fuel_gauge_switch",
-        )
-        await _add_switch(mainboard, switches, CONF_ENABLE_STAT, "ENABLE_STAT", "set_enable_stat_switch")
+    switches = mainboard_config[CONF_SWITCHES]
+    await _add_switch(mainboard, switches, CONF_ENABLE_EN, "ENABLE_EN", "set_enable_EN_switch")
+    await _add_switch(mainboard, switches, CONF_ENABLE_3V3, "ENABLE_3V3", "set_enable_3V3_switch")
+    await _add_switch(mainboard, switches, CONF_ENABLE_VSQT, "ENABLE_VSQT", "set_enable_VSQT_switch")
+    await _add_switch(
+        mainboard,
+        switches,
+        CONF_ENABLE_BATTERY_TEMP_SENSE,
+        "ENABLE_BATTERY_TEMP_SENSE",
+        "set_enable_battery_temp_sense_switch",
+    )
+    await _add_switch(
+        mainboard,
+        switches,
+        CONF_ENABLE_BATTERY_CHARGING,
+        "ENABLE_BATTERY_CHARGING",
+        "set_enable_battery_charging_switch",
+    )
+    await _add_switch(
+        mainboard,
+        switches,
+        CONF_ENABLE_BATTERY_FUEL_GAUGE,
+        "ENABLE_BATTERY_FUEL_GAUGE",
+        "set_enable_battery_fuel_gauge_switch",
+    )
+    await _add_switch(mainboard, switches, CONF_ENABLE_STAT, "ENABLE_STAT", "set_enable_stat_switch")

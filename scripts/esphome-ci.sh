@@ -110,6 +110,36 @@ run_config_expect_fail() {
   rm -rf "$tmp_dir"
 }
 
+run_multi_mainboard_expect_fail() {
+  local tmp_dir
+  local log_file
+  tmp_dir="$(mktemp -d)"
+  log_file="$tmp_dir/output.log"
+
+  make_config "$tmp_dir" "powerfeather-multi-mainboard.yaml" "esp-idf" "v2"
+  perl -0pi \
+    -e 's/mainboard:\n    id: "my_powerfeather"/mainboard:\n  - id: "my_powerfeather_a"/;' \
+    -e 's/(web_server:\n)/  - id: "my_powerfeather_b"\n    board_revision: v2\n\n\1/;' \
+    "$tmp_dir/powerfeather-multi-mainboard.yaml"
+
+  if docker_esphome "$tmp_dir" config "powerfeather-multi-mainboard.yaml" >"$log_file" 2>&1; then
+    printf 'Expected config case powerfeather-multi-mainboard to fail, but it passed.\n' >&2
+    cat "$log_file" >&2
+    rm -rf "$tmp_dir"
+    return 1
+  fi
+
+  if ! grep -Fq "expected a dictionary" "$log_file"; then
+    printf 'Expected config case powerfeather-multi-mainboard to fail with "expected a dictionary". Output was:\n' >&2
+    cat "$log_file" >&2
+    rm -rf "$tmp_dir"
+    return 1
+  fi
+
+  printf 'Config case powerfeather-multi-mainboard failed as expected.\n'
+  rm -rf "$tmp_dir"
+}
+
 validate() {
   git -C "$ROOT_DIR" diff --check
 
@@ -132,6 +162,7 @@ validate() {
     "Update interval must be at least 500ms" \
     "1000" \
     "100ms"
+  run_multi_mainboard_expect_fail
 }
 
 compile_one() {

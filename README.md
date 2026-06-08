@@ -55,6 +55,10 @@ powerfeather:
 
 See [config/powerfeather.yaml](config/powerfeather.yaml) for a full example.
 
+Each ESPHome YAML builds firmware for one physical PowerFeather board, so
+`powerfeather.mainboard` is a single object. To use multiple PowerFeather boards
+in one Home Assistant installation, create one ESPHome node/config per board.
+
 ## Entities
 
 The component groups ESPHome entities under `powerfeather.mainboard`:
