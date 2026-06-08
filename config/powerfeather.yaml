@@ -86,6 +86,8 @@ powerfeather:
         name: "Battery Low Charge Alarm"
 
     switches:
+      enable_EN:
+        name: "Enable FeatherWings"
       enable_3V3:
         name: "Enable 3V3"
       enable_VSQT:

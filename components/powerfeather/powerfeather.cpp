@@ -103,17 +103,19 @@ namespace esphome
         switch (update.type)
         {
         case TaskUpdateType::ENABLE_EN:
+          ESP_LOGD(TAG, "Received EN enable state: %d", update.data.b);
+          mainboard->enable_EN_ = update.data.b;
           PowerFeather::Board.setEN(mainboard->enable_EN_);
           break;
 
         case TaskUpdateType::ENABLE_3V3:
-          ESP_LOGD(TAG, "Recieved EN enable state: %d", update.data.b);
+          ESP_LOGD(TAG, "Received 3V3 enable state: %d", update.data.b);
           mainboard->enable_3V3_ = update.data.b;
           PowerFeather::Board.enable3V3(mainboard->enable_3V3_);
           break;
 
         case TaskUpdateType::ENABLE_VSQT:
-          ESP_LOGD(TAG, "Recieved VSQT enable state: %d", update.data.b);
+          ESP_LOGD(TAG, "Received VSQT enable state: %d", update.data.b);
           mainboard->enable_VSQT_ = update.data.b;
           PowerFeather::Board.enableVSQT(mainboard->enable_VSQT_);
           break;
