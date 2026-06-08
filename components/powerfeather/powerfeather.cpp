@@ -138,6 +138,20 @@ namespace esphome
       powerfeather::PowerFeatherMainboard *mainboard =
         reinterpret_cast<powerfeather::PowerFeatherMainboard *>(param);
 
+      auto publish_bool = [mainboard](TaskUpdateType type, bool state) {
+        TaskUpdate control_state;
+        control_state.type = type;
+        control_state.data.b = state;
+        mainboard->send_control_state_(control_state);
+      };
+
+      auto publish_float = [mainboard](TaskUpdateType type, float state) {
+        TaskUpdate control_state;
+        control_state.type = type;
+        control_state.data.f = state;
+        mainboard->send_control_state_(control_state);
+      };
+
       while (true)
       {
         TaskUpdate update;
@@ -151,6 +165,7 @@ namespace esphome
           {
             mainboard->enable_EN_ = update.data.b;
           }
+          publish_bool(TaskUpdateType::ENABLE_EN, mainboard->enable_EN_);
           break;
 
         case TaskUpdateType::ENABLE_3V3:
@@ -159,6 +174,7 @@ namespace esphome
           {
             mainboard->enable_3V3_ = update.data.b;
           }
+          publish_bool(TaskUpdateType::ENABLE_3V3, mainboard->enable_3V3_);
           break;
 
         case TaskUpdateType::ENABLE_VSQT:
@@ -167,6 +183,7 @@ namespace esphome
           {
             mainboard->enable_VSQT_ = update.data.b;
           }
+          publish_bool(TaskUpdateType::ENABLE_VSQT, mainboard->enable_VSQT_);
           break;
 
         case TaskUpdateType::ENABLE_BATTERY_TEMP_SENSE:
@@ -175,6 +192,7 @@ namespace esphome
           {
             mainboard->enable_battery_temp_sense_ = update.data.b;
           }
+          publish_bool(TaskUpdateType::ENABLE_BATTERY_TEMP_SENSE, mainboard->enable_battery_temp_sense_);
           break;
 
         case TaskUpdateType::ENABLE_BATTERY_FUEL_GAUGE:
@@ -183,6 +201,7 @@ namespace esphome
           {
             mainboard->enable_battery_fuel_gauge_ = update.data.b;
           }
+          publish_bool(TaskUpdateType::ENABLE_BATTERY_FUEL_GAUGE, mainboard->enable_battery_fuel_gauge_);
           break;
 
         case TaskUpdateType::ENABLE_BATTERY_CHARGING:
@@ -191,6 +210,7 @@ namespace esphome
           {
             mainboard->enable_battery_charging_ = update.data.b;
           }
+          publish_bool(TaskUpdateType::ENABLE_BATTERY_CHARGING, mainboard->enable_battery_charging_);
           break;
 
         case TaskUpdateType::ENABLE_STAT:
@@ -199,6 +219,7 @@ namespace esphome
           {
             mainboard->enable_stat_ = update.data.b;
           }
+          publish_bool(TaskUpdateType::ENABLE_STAT, mainboard->enable_stat_);
           break;
 
         case TaskUpdateType::POWERCYCLE:
@@ -227,6 +248,7 @@ namespace esphome
           {
             mainboard->supply_maintain_voltage_ = update.data.f;
           }
+          publish_float(TaskUpdateType::SUPPLY_MAINTAIN_VOLTAGE, mainboard->supply_maintain_voltage_);
           break;
 
         case TaskUpdateType::BATTERY_CHARGING_MAX_CURRENT:
@@ -235,6 +257,7 @@ namespace esphome
           {
             mainboard->battery_charging_max_current_ = update.data.f;
           }
+          publish_float(TaskUpdateType::BATTERY_CHARGING_MAX_CURRENT, mainboard->battery_charging_max_current_);
           break;
 
         case TaskUpdateType::BATTERY_LOW_VOLTAGE_ALARM:
@@ -243,6 +266,7 @@ namespace esphome
           {
             mainboard->battery_low_voltage_alarm_ = update.data.f;
           }
+          publish_float(TaskUpdateType::BATTERY_LOW_VOLTAGE_ALARM, mainboard->battery_low_voltage_alarm_);
           break;
 
         case TaskUpdateType::BATTERY_HIGH_VOLTAGE_ALARM:
@@ -251,6 +275,7 @@ namespace esphome
           {
             mainboard->battery_high_voltage_alarm_ = update.data.f;
           }
+          publish_float(TaskUpdateType::BATTERY_HIGH_VOLTAGE_ALARM, mainboard->battery_high_voltage_alarm_);
           break;
 
         case TaskUpdateType::BATTERY_LOW_CHARGE_ALARM:
@@ -259,6 +284,7 @@ namespace esphome
           {
             mainboard->battery_low_charge_alarm_ = update.data.f;
           }
+          publish_float(TaskUpdateType::BATTERY_LOW_CHARGE_ALARM, mainboard->battery_low_charge_alarm_);
           break;
 
         case TaskUpdateType::SENSORS:
@@ -362,9 +388,17 @@ namespace esphome
         return;
       }
 
+      control_state_queue_ = xQueueCreate(UPDATE_TASK_QUEUE_SIZE_, sizeof(TaskUpdate));
+      if (control_state_queue_ == NULL)
+      {
+        ESP_LOGE(TAG, "Failed to create PowerFeather control state queue");
+        mark_failed();
+        return;
+      }
+
       if (xTaskCreate(update_task_, "powerfeather", UPDATE_TASK_STACK_SIZE_, this, uxTaskPriorityGet(NULL), NULL) != pdTRUE)
       {
-        ESP_LOGE(TAG, "Failed to create PowerFeather task queue");
+        ESP_LOGE(TAG, "Failed to create PowerFeather update task");
         mark_failed();
         return;
       }
@@ -373,6 +407,8 @@ namespace esphome
 
     void PowerFeatherMainboard::loop()
     {
+      publish_control_states_();
+
       uint32_t now = millis();
       // Do sensors update before an anticipated read
       if (!sensors_updated_ && now >= ((sensors_publish_time_ + update_interval_) - UPDATE_TASK_SENSOR_UPDATE_MS_))
@@ -462,6 +498,108 @@ namespace esphome
       ESP_LOGCONFIG(TAG, "Battery Type: %s", battery_type_str);
     }
 
+    void PowerFeatherMainboard::publish_control_states_()
+    {
+      if (control_state_queue_ == NULL)
+      {
+        return;
+      }
+
+      TaskUpdate control_state;
+      while (xQueueReceive(control_state_queue_, &control_state, 0) == pdTRUE)
+      {
+        switch (control_state.type)
+        {
+        case TaskUpdateType::ENABLE_EN:
+          if (enable_EN_switch_ != nullptr)
+          {
+            enable_EN_switch_->publish_state(control_state.data.b);
+          }
+          break;
+
+        case TaskUpdateType::ENABLE_3V3:
+          if (enable_3V3_switch_ != nullptr)
+          {
+            enable_3V3_switch_->publish_state(control_state.data.b);
+          }
+          break;
+
+        case TaskUpdateType::ENABLE_VSQT:
+          if (enable_VSQT_switch_ != nullptr)
+          {
+            enable_VSQT_switch_->publish_state(control_state.data.b);
+          }
+          break;
+
+        case TaskUpdateType::ENABLE_BATTERY_TEMP_SENSE:
+          if (enable_battery_temp_sense_switch_ != nullptr)
+          {
+            enable_battery_temp_sense_switch_->publish_state(control_state.data.b);
+          }
+          break;
+
+        case TaskUpdateType::ENABLE_BATTERY_FUEL_GAUGE:
+          if (enable_battery_fuel_gauge_switch_ != nullptr)
+          {
+            enable_battery_fuel_gauge_switch_->publish_state(control_state.data.b);
+          }
+          break;
+
+        case TaskUpdateType::ENABLE_BATTERY_CHARGING:
+          if (enable_battery_charging_switch_ != nullptr)
+          {
+            enable_battery_charging_switch_->publish_state(control_state.data.b);
+          }
+          break;
+
+        case TaskUpdateType::ENABLE_STAT:
+          if (enable_stat_switch_ != nullptr)
+          {
+            enable_stat_switch_->publish_state(control_state.data.b);
+          }
+          break;
+
+        case TaskUpdateType::SUPPLY_MAINTAIN_VOLTAGE:
+          if (supply_maintain_voltage_value_ != nullptr)
+          {
+            supply_maintain_voltage_value_->publish_state(control_state.data.f);
+          }
+          break;
+
+        case TaskUpdateType::BATTERY_CHARGING_MAX_CURRENT:
+          if (battery_charging_max_current_value_ != nullptr)
+          {
+            battery_charging_max_current_value_->publish_state(control_state.data.f);
+          }
+          break;
+
+        case TaskUpdateType::BATTERY_LOW_VOLTAGE_ALARM:
+          if (battery_low_voltage_alarm_value_ != nullptr)
+          {
+            battery_low_voltage_alarm_value_->publish_state(control_state.data.f);
+          }
+          break;
+
+        case TaskUpdateType::BATTERY_HIGH_VOLTAGE_ALARM:
+          if (battery_high_voltage_alarm_value_ != nullptr)
+          {
+            battery_high_voltage_alarm_value_->publish_state(control_state.data.f);
+          }
+          break;
+
+        case TaskUpdateType::BATTERY_LOW_CHARGE_ALARM:
+          if (battery_low_charge_alarm_value_ != nullptr)
+          {
+            battery_low_charge_alarm_value_->publish_state(control_state.data.f);
+          }
+          break;
+
+        default:
+          break;
+        }
+      }
+    }
+
     void PowerFeatherMainboard::send_task_update(TaskUpdate update)
     {
       if (update_task_queue_ == NULL)
@@ -473,6 +611,20 @@ namespace esphome
       if (xQueueSend(update_task_queue_, &update, portMAX_DELAY) != pdTRUE)
       {
         ESP_LOGW(TAG, "Failed to queue PowerFeather update");
+      }
+    }
+
+    void PowerFeatherMainboard::send_control_state_(TaskUpdate update)
+    {
+      if (control_state_queue_ == NULL)
+      {
+        ESP_LOGW(TAG, "PowerFeather control state queue is not available");
+        return;
+      }
+
+      if (xQueueSend(control_state_queue_, &update, 0) != pdTRUE)
+      {
+        ESP_LOGW(TAG, "Failed to queue PowerFeather control state");
       }
     }
 

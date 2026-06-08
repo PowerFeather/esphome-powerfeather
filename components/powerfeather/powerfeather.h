@@ -159,6 +159,7 @@ namespace esphome
       float battery_low_charge_alarm_{NAN};
 
       QueueHandle_t update_task_queue_ = NULL;
+      QueueHandle_t control_state_queue_ = NULL;
 
       switch_::Switch *enable_EN_switch_{nullptr};
       switch_::Switch *enable_3V3_switch_{nullptr};
@@ -189,6 +190,8 @@ namespace esphome
 
       static void update_task_(void *param);
       void update_sensors_();
+      void publish_control_states_();
+      void send_control_state_(TaskUpdate update);
 
       uint32_t sensors_publish_time_ = 0;
       bool sensors_updated_ = false;
@@ -220,7 +223,6 @@ namespace esphome
         update.type = type_;
         update.data.f = value;
         this->parent_->send_task_update(update);
-        this->publish_state(value);
       }
     };
 
@@ -236,7 +238,6 @@ namespace esphome
         update.type = type_;
         update.data.b = state;
         this->parent_->send_task_update(update);
-        this->publish_state(state);
       }
     };
   } // namespace powerfeather
