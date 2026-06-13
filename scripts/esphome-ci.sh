@@ -34,6 +34,25 @@ make_config() {
     "$config_dir/$output_name"
 }
 
+make_example_config() {
+  local config_dir="$1"
+  local example_name="$2"
+
+  mkdir -p "$config_dir"
+  cp "$ROOT_DIR/examples/$example_name" "$config_dir/$example_name"
+  cat > "$config_dir/secrets.yaml" <<'EOF'
+api_encryption_key: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+fallback_ap_password: "ci-fallback-password"
+ota_password: "ci-ota-password"
+wifi_ssid: "ci-network"
+wifi_password: "ci-password"
+EOF
+
+  perl -0pi \
+    -e 's#external_components:\n(?:  .+\n)+\npowerfeather:#external_components:\n  - source:\n      type: local\n      path: /components\n    components: [powerfeather]\n    refresh: 0s\n\npowerfeather:#;' \
+    "$config_dir/$example_name"
+}
+
 docker_esphome() {
   local config_dir="$1"
   shift
@@ -140,6 +159,29 @@ run_multi_mainboard_expect_fail() {
   rm -rf "$tmp_dir"
 }
 
+run_example_expect_pass() {
+  local example_name="$1"
+  local tmp_dir
+  local log_file
+  local status
+  tmp_dir="$(mktemp -d)"
+  log_file="$tmp_dir/output.log"
+
+  make_example_config "$tmp_dir" "$example_name"
+  set +e
+  docker_esphome "$tmp_dir" config "$example_name" >"$log_file" 2>&1
+  status=$?
+  set -e
+  if [ "$status" -ne 0 ]; then
+    printf 'Example %s failed. Output was:\n' "$example_name" >&2
+    cat "$log_file" >&2
+  else
+    printf 'Example %s passed.\n' "$example_name"
+  fi
+  rm -rf "$tmp_dir"
+  return "$status"
+}
+
 validate() {
   git -C "$ROOT_DIR" diff --check
 
@@ -163,6 +205,10 @@ validate() {
     "1000" \
     "100ms"
   run_multi_mainboard_expect_fail
+  run_example_expect_pass "powerfeather-v1.yaml"
+  run_example_expect_pass "powerfeather-v2.yaml"
+  run_example_expect_pass "powerfeather-v2-lfp.yaml"
+  run_example_expect_pass "powerfeather-v2-arduino.yaml"
 }
 
 compile_one() {

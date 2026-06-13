@@ -59,6 +59,15 @@ Each ESPHome YAML builds firmware for one physical PowerFeather board, so
 `powerfeather.mainboard` is a single object. To use multiple PowerFeather boards
 in one Home Assistant installation, create one ESPHome node/config per board.
 
+Examples are available in:
+
+| Example | Purpose |
+| --- | --- |
+| [examples/powerfeather-v1.yaml](examples/powerfeather-v1.yaml) | PowerFeather V1, ESP-IDF, 3.7 V lithium battery. |
+| [examples/powerfeather-v2.yaml](examples/powerfeather-v2.yaml) | PowerFeather V2, ESP-IDF, 3.7 V lithium battery. |
+| [examples/powerfeather-v2-lfp.yaml](examples/powerfeather-v2-lfp.yaml) | PowerFeather V2, ESP-IDF, LiFePO4 battery. |
+| [examples/powerfeather-v2-arduino.yaml](examples/powerfeather-v2-arduino.yaml) | PowerFeather V2, Arduino framework, 3.7 V lithium battery. |
+
 ## Entities
 
 The component groups ESPHome entities under `powerfeather.mainboard`:
