@@ -50,38 +50,39 @@ v1-arduino device="/dev/ttyACM0":
 
 _flash example device:
     @set -eu; \
-    : "$${WIFI_SSID:?Set WIFI_SSID before flashing}"; \
-    : "$${WIFI_PASSWORD:?Set WIFI_PASSWORD before flashing}"; \
-    tmp_dir="$$(mktemp -d)"; \
-    cleanup() { rm -rf "$$tmp_dir"; }; \
+    : "${WIFI_SSID:?Set WIFI_SSID before flashing}"; \
+    : "${WIFI_PASSWORD:?Set WIFI_PASSWORD before flashing}"; \
+    test -e "{{ device }}" || { echo "Serial device '{{ device }}' does not exist. Try 'just ports'." >&2; exit 2; }; \
+    tmp_dir="$(mktemp -d)"; \
+    cleanup() { rm -rf "$tmp_dir"; }; \
     trap cleanup EXIT; \
-    cp "{{ repo }}/examples/{{ example }}" "$$tmp_dir/powerfeather.yaml"; \
-    cp "{{ wifi_secrets }}" "$$tmp_dir/secrets.yaml"; \
-    api_key="$$(openssl rand -base64 32 2>/dev/null || printf 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=')"; \
-    fallback_pass="$$(openssl rand -hex 12 2>/dev/null || printf 'powerfeather-fallback')"; \
-    ota_pass="$$(openssl rand -hex 12 2>/dev/null || printf 'powerfeather-ota')"; \
-    API_KEY="$$api_key" FALLBACK_PASS="$$fallback_pass" OTA_PASS="$$ota_pass" perl -0pi \
+    cp "{{ repo }}/examples/{{ example }}" "$tmp_dir/powerfeather.yaml"; \
+    cp "{{ wifi_secrets }}" "$tmp_dir/secrets.yaml"; \
+    api_key="$(openssl rand -base64 32 2>/dev/null || printf 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=')"; \
+    fallback_pass="$(openssl rand -hex 12 2>/dev/null || printf 'powerfeather-fallback')"; \
+    ota_pass="$(openssl rand -hex 12 2>/dev/null || printf 'powerfeather-ota')"; \
+    API_KEY="$api_key" FALLBACK_PASS="$fallback_pass" OTA_PASS="$ota_pass" perl -0pi \
       -e 's#key: !secret api_encryption_key#key: "$ENV{API_KEY}"#;' \
       -e 's#password: !secret ota_password#password: "$ENV{OTA_PASS}"#;' \
       -e 's#password: !secret fallback_ap_password#password: "$ENV{FALLBACK_PASS}"#;' \
-      "$$tmp_dir/powerfeather.yaml"; \
+      "$tmp_dir/powerfeather.yaml"; \
     perl -0pi \
       -e 's#external_components:\n(?:  .+\n)+\npowerfeather:#external_components:\n  - source:\n      type: local\n      path: /components\n    components: [powerfeather]\n    refresh: 0s\n\npowerfeather:#;' \
-      "$$tmp_dir/powerfeather.yaml"; \
+      "$tmp_dir/powerfeather.yaml"; \
     docker run --rm \
-      --user "$$(id -u):$$(id -g)" \
+      --user "$(id -u):$(id -g)" \
       -e HOME=/config \
       -e PLATFORMIO_CORE_DIR=/config/.esphome/platformio \
       -e PLATFORMIO_GLOBALLIB_DIR=/config/.esphome/platformio/lib \
       -e PLATFORMIO_SETTING_ENABLE_TELEMETRY=false \
       -e WIFI_SSID \
       -e WIFI_PASSWORD \
-      -v "$$tmp_dir:/config" \
+      -v "$tmp_dir:/config" \
       -v "{{ repo }}/components:/components" \
       -w /config \
       "{{ image }}" config powerfeather.yaml; \
     docker run --rm \
-      --user "$$(id -u):$$(id -g)" \
+      --user "$(id -u):$(id -g)" \
       --device="{{ device }}" \
       -e HOME=/config \
       -e PLATFORMIO_CORE_DIR=/config/.esphome/platformio \
@@ -89,7 +90,7 @@ _flash example device:
       -e PLATFORMIO_SETTING_ENABLE_TELEMETRY=false \
       -e WIFI_SSID \
       -e WIFI_PASSWORD \
-      -v "$$tmp_dir:/config" \
+      -v "$tmp_dir:/config" \
       -v "{{ repo }}/components:/components" \
       -w /config \
       "{{ image }}" run powerfeather.yaml --device "{{ device }}"
