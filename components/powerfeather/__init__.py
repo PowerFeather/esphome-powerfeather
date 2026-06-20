@@ -418,7 +418,7 @@ async def _add_switch(mainboard, config, key, update_type, setter):
 
 
 async def to_code(config):
-    cg.add_library(name="PowerFeather-SDK", version="^2.0.0")
+    cg.add_library(name="PowerFeather-SDK", version=">=2.1.1")
 
     if CORE.using_arduino:
         cg.add_build_flag("-DARDUINO_ESP32S3_POWERFEATHER")

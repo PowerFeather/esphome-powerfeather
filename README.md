@@ -61,13 +61,9 @@ external_components:
     components: [powerfeather]
 ```
 
-For a formal release, prefer a tagged source instead of `@main`, for example:
-
-```yaml
-external_components:
-  - source: github://powerfeatherdev/esphome-powerfeather@v0.1.0
-    components: [powerfeather]
-```
+`external_components.source` uses a Git ref, so it cannot express a version
+range such as `v2.0.0+`. Use `@main` to track the latest component source, or
+replace it with an exact release tag for reproducible builds.
 
 For local development from this repository:
 
