@@ -23,7 +23,7 @@ make_config() {
 
   mkdir -p "$config_dir"
   cp "$ROOT_DIR/test/configs/powerfeather.yaml" "$config_dir/$output_name"
-  printf 'ssid: "ci-network"\npassword: "ci-password"\n' > "$config_dir/secrets.yaml"
+  printf 'wifi_ssid: "ci-network"\nwifi_password: "ci-password"\n' > "$config_dir/secrets.yaml"
 
   perl -0pi \
     -e "s/type: esp-idf/type: ${framework}/;" \
