@@ -53,6 +53,8 @@ _flash example device:
     : "${WIFI_SSID:?Set WIFI_SSID before flashing}"; \
     : "${WIFI_PASSWORD:?Set WIFI_PASSWORD before flashing}"; \
     test -e "{{ device }}" || { echo "Serial device '{{ device }}' does not exist. Try 'just ports'." >&2; exit 2; }; \
+    device_gid="$(stat -c '%g' "{{ device }}")"; \
+    user_name="$(id -un)"; \
     tmp_dir="$(mktemp -d)"; \
     cleanup() { rm -rf "$tmp_dir"; }; \
     trap cleanup EXIT; \
@@ -71,25 +73,34 @@ _flash example device:
       "$tmp_dir/powerfeather.yaml"; \
     docker run --rm \
       --user "$(id -u):$(id -g)" \
+      -e USER="$user_name" \
+      -e LOGNAME="$user_name" \
       -e HOME=/config \
       -e PLATFORMIO_CORE_DIR=/config/.esphome/platformio \
       -e PLATFORMIO_GLOBALLIB_DIR=/config/.esphome/platformio/lib \
       -e PLATFORMIO_SETTING_ENABLE_TELEMETRY=false \
       -e WIFI_SSID \
       -e WIFI_PASSWORD \
+      -v /etc/passwd:/etc/passwd:ro \
+      -v /etc/group:/etc/group:ro \
       -v "$tmp_dir:/config" \
       -v "{{ repo }}/components:/components" \
       -w /config \
       "{{ image }}" config powerfeather.yaml; \
     docker run --rm \
       --user "$(id -u):$(id -g)" \
+      --group-add "$device_gid" \
       --device="{{ device }}" \
+      -e USER="$user_name" \
+      -e LOGNAME="$user_name" \
       -e HOME=/config \
       -e PLATFORMIO_CORE_DIR=/config/.esphome/platformio \
       -e PLATFORMIO_GLOBALLIB_DIR=/config/.esphome/platformio/lib \
       -e PLATFORMIO_SETTING_ENABLE_TELEMETRY=false \
       -e WIFI_SSID \
       -e WIFI_PASSWORD \
+      -v /etc/passwd:/etc/passwd:ro \
+      -v /etc/group:/etc/group:ro \
       -v "$tmp_dir:/config" \
       -v "{{ repo }}/components:/components" \
       -w /config \
