@@ -13,6 +13,4 @@
 /secrets.yaml
 .envrc
 
-config/.esphome/
-config/secrets.yaml
 flash/

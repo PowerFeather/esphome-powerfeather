@@ -1,6 +1,6 @@
 substitutions:
-  name: powerfeather-v2-arduino
-  friendly_name: PowerFeather V2 Arduino
+  name: powerfeather-v2-idf-lfp
+  friendly_name: PowerFeather V2 IDF LFP
 
 esphome:
   name: ${name}
@@ -12,7 +12,7 @@ esp32:
   board: esp32-s3-devkitc-1
   variant: esp32s3
   framework:
-    type: arduino
+    type: esp-idf
 
 logger:
 
@@ -43,7 +43,7 @@ powerfeather:
     board_revision: v2
     battery:
       capacity: 1000
-      type: Generic_3V7
+      type: Generic_LFP
     update_interval: 10s
 
     sensors:

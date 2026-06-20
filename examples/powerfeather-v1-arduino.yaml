@@ -1,6 +1,6 @@
 substitutions:
-  name: powerfeather-v2-arduino
-  friendly_name: PowerFeather V2 Arduino
+  name: powerfeather-v1-arduino
+  friendly_name: PowerFeather V1 Arduino
 
 esphome:
   name: ${name}
@@ -40,7 +40,7 @@ external_components:
 powerfeather:
   mainboard:
     id: powerfeather_mainboard
-    board_revision: v2
+    board_revision: v1
     battery:
       capacity: 1000
       type: Generic_3V7

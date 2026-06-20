@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 IMAGE="${ESPHOME_DOCKER_IMAGE:-ghcr.io/esphome/esphome:stable}"
 
 usage() {
@@ -22,7 +22,7 @@ make_config() {
   local update_interval="${7:-5s}"
 
   mkdir -p "$config_dir"
-  cp "$ROOT_DIR/config/powerfeather.yaml" "$config_dir/$output_name"
+  cp "$ROOT_DIR/test/configs/powerfeather.yaml" "$config_dir/$output_name"
   printf 'ssid: "ci-network"\npassword: "ci-password"\n' > "$config_dir/secrets.yaml"
 
   perl -0pi \
@@ -205,10 +205,12 @@ validate() {
     "1000" \
     "100ms"
   run_multi_mainboard_expect_fail
-  run_example_expect_pass "powerfeather-v1.yaml"
-  run_example_expect_pass "powerfeather-v2.yaml"
-  run_example_expect_pass "powerfeather-v2-lfp.yaml"
+  run_example_expect_pass "powerfeather-v2-idf.yaml"
   run_example_expect_pass "powerfeather-v2-arduino.yaml"
+  run_example_expect_pass "powerfeather-v2-idf-lfp.yaml"
+  run_example_expect_pass "powerfeather-v2-arduino-lfp.yaml"
+  run_example_expect_pass "powerfeather-v1-idf.yaml"
+  run_example_expect_pass "powerfeather-v1-arduino.yaml"
 }
 
 compile_one() {

@@ -1,0 +1,95 @@
+set positional-arguments
+
+repo := justfile_directory() / ".."
+wifi_secrets := justfile_directory() / "configs/secrets.yaml"
+image := env_var_or_default("ESPHOME_DOCKER_IMAGE", "ghcr.io/esphome/esphome:stable")
+
+default:
+    @just --list
+
+# Run validation plus ESP-IDF and Arduino compiles for one board revision.
+smoke revision="v2":
+    @case "{{ revision }}" in v1|v2) ;; *) echo "Unknown revision '{{ revision }}'. Use v1 or v2." >&2; exit 2 ;; esac
+    bash -n "{{ repo }}/test/scripts/esphome-ci.sh"
+    bash "{{ repo }}/test/scripts/esphome-ci.sh" validate
+    bash "{{ repo }}/test/scripts/esphome-ci.sh" compile esp-idf "{{ revision }}"
+    bash "{{ repo }}/test/scripts/esphome-ci.sh" compile arduino "{{ revision }}"
+
+# Run the full validation and compile matrix.
+ci:
+    bash -n "{{ repo }}/test/scripts/esphome-ci.sh"
+    bash "{{ repo }}/test/scripts/esphome-ci.sh" all
+
+# List likely USB serial devices.
+ports:
+    @ls /dev/ttyACM* /dev/ttyUSB* 2>/dev/null || true
+
+# Validate, compile, flash, and follow logs for PowerFeather V2 ESP-IDF.
+v2-idf device="/dev/ttyACM0":
+    just _flash powerfeather-v2-idf.yaml "{{ device }}"
+
+# Validate, compile, flash, and follow logs for PowerFeather V2 Arduino.
+v2-arduino device="/dev/ttyACM0":
+    just _flash powerfeather-v2-arduino.yaml "{{ device }}"
+
+# Validate, compile, flash, and follow logs for PowerFeather V2 ESP-IDF with LiFePO4.
+v2-idf-lfp device="/dev/ttyACM0":
+    just _flash powerfeather-v2-idf-lfp.yaml "{{ device }}"
+
+# Validate, compile, flash, and follow logs for PowerFeather V2 Arduino with LiFePO4.
+v2-arduino-lfp device="/dev/ttyACM0":
+    just _flash powerfeather-v2-arduino-lfp.yaml "{{ device }}"
+
+# Validate, compile, flash, and follow logs for PowerFeather V1 ESP-IDF.
+v1-idf device="/dev/ttyACM0":
+    just _flash powerfeather-v1-idf.yaml "{{ device }}"
+
+# Validate, compile, flash, and follow logs for PowerFeather V1 Arduino.
+v1-arduino device="/dev/ttyACM0":
+    just _flash powerfeather-v1-arduino.yaml "{{ device }}"
+
+_flash example device:
+    @set -eu; \
+    : "$${WIFI_SSID:?Set WIFI_SSID before flashing}"; \
+    : "$${WIFI_PASSWORD:?Set WIFI_PASSWORD before flashing}"; \
+    tmp_dir="$$(mktemp -d)"; \
+    cleanup() { rm -rf "$$tmp_dir"; }; \
+    trap cleanup EXIT; \
+    cp "{{ repo }}/examples/{{ example }}" "$$tmp_dir/powerfeather.yaml"; \
+    cp "{{ wifi_secrets }}" "$$tmp_dir/secrets.yaml"; \
+    api_key="$$(openssl rand -base64 32 2>/dev/null || printf 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=')"; \
+    fallback_pass="$$(openssl rand -hex 12 2>/dev/null || printf 'powerfeather-fallback')"; \
+    ota_pass="$$(openssl rand -hex 12 2>/dev/null || printf 'powerfeather-ota')"; \
+    API_KEY="$$api_key" FALLBACK_PASS="$$fallback_pass" OTA_PASS="$$ota_pass" perl -0pi \
+      -e 's#key: !secret api_encryption_key#key: "$ENV{API_KEY}"#;' \
+      -e 's#password: !secret ota_password#password: "$ENV{OTA_PASS}"#;' \
+      -e 's#password: !secret fallback_ap_password#password: "$ENV{FALLBACK_PASS}"#;' \
+      "$$tmp_dir/powerfeather.yaml"; \
+    perl -0pi \
+      -e 's#external_components:\n(?:  .+\n)+\npowerfeather:#external_components:\n  - source:\n      type: local\n      path: /components\n    components: [powerfeather]\n    refresh: 0s\n\npowerfeather:#;' \
+      "$$tmp_dir/powerfeather.yaml"; \
+    docker run --rm \
+      --user "$$(id -u):$$(id -g)" \
+      -e HOME=/config \
+      -e PLATFORMIO_CORE_DIR=/config/.esphome/platformio \
+      -e PLATFORMIO_GLOBALLIB_DIR=/config/.esphome/platformio/lib \
+      -e PLATFORMIO_SETTING_ENABLE_TELEMETRY=false \
+      -e WIFI_SSID \
+      -e WIFI_PASSWORD \
+      -v "$$tmp_dir:/config" \
+      -v "{{ repo }}/components:/components" \
+      -w /config \
+      "{{ image }}" config powerfeather.yaml; \
+    docker run --rm \
+      --user "$$(id -u):$$(id -g)" \
+      --device="{{ device }}" \
+      -e HOME=/config \
+      -e PLATFORMIO_CORE_DIR=/config/.esphome/platformio \
+      -e PLATFORMIO_GLOBALLIB_DIR=/config/.esphome/platformio/lib \
+      -e PLATFORMIO_SETTING_ENABLE_TELEMETRY=false \
+      -e WIFI_SSID \
+      -e WIFI_PASSWORD \
+      -v "$$tmp_dir:/config" \
+      -v "{{ repo }}/components:/components" \
+      -w /config \
+      "{{ image }}" run powerfeather.yaml --device "{{ device }}"

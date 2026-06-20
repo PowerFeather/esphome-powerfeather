@@ -14,10 +14,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Check local test script syntax
-        run: bash -n scripts/esphome-ci.sh
+        run: bash -n test/scripts/esphome-ci.sh
 
       - name: Validate schema cases
-        run: bash scripts/esphome-ci.sh validate
+        run: bash test/scripts/esphome-ci.sh validate
 
   build:
     name: Build ${{ matrix.framework }} ${{ matrix.revision }}
@@ -39,4 +39,4 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Compile firmware
-        run: bash scripts/esphome-ci.sh compile "${{ matrix.framework }}" "${{ matrix.revision }}"
+        run: bash test/scripts/esphome-ci.sh compile "${{ matrix.framework }}" "${{ matrix.revision }}"

@@ -30,10 +30,12 @@ Start from the example that matches your board and framework:
 
 | Example | Purpose |
 | --- | --- |
-| [examples/powerfeather-v1.yaml](examples/powerfeather-v1.yaml) | PowerFeather V1, ESP-IDF, 3.7 V lithium battery. |
-| [examples/powerfeather-v2.yaml](examples/powerfeather-v2.yaml) | PowerFeather V2, ESP-IDF, 3.7 V lithium battery. |
-| [examples/powerfeather-v2-lfp.yaml](examples/powerfeather-v2-lfp.yaml) | PowerFeather V2, ESP-IDF, LiFePO4 battery. |
+| [examples/powerfeather-v2-idf.yaml](examples/powerfeather-v2-idf.yaml) | PowerFeather V2, ESP-IDF, 3.7 V lithium battery. |
 | [examples/powerfeather-v2-arduino.yaml](examples/powerfeather-v2-arduino.yaml) | PowerFeather V2, Arduino framework, 3.7 V lithium battery. |
+| [examples/powerfeather-v2-idf-lfp.yaml](examples/powerfeather-v2-idf-lfp.yaml) | PowerFeather V2, ESP-IDF, LiFePO4 battery. |
+| [examples/powerfeather-v2-arduino-lfp.yaml](examples/powerfeather-v2-arduino-lfp.yaml) | PowerFeather V2, Arduino framework, LiFePO4 battery. |
+| [examples/powerfeather-v1-idf.yaml](examples/powerfeather-v1-idf.yaml) | PowerFeather V1, ESP-IDF, 3.7 V lithium battery. |
+| [examples/powerfeather-v1-arduino.yaml](examples/powerfeather-v1-arduino.yaml) | PowerFeather V1, Arduino framework, 3.7 V lithium battery. |
 
 The examples use ESPHome secrets:
 
@@ -44,6 +46,10 @@ ota_password: "..."
 wifi_ssid: "..."
 wifi_password: "..."
 ```
+
+`api_encryption_key` must be a base64-encoded 32-byte key. Generate one with
+`openssl rand -base64 32`. The other password secrets are normal passwords you
+choose.
 
 ## Installation
 
@@ -89,8 +95,8 @@ powerfeather:
 `battery.capacity` is in mAh. Set it to `0` to initialize the SDK without a
 configured battery.
 
-See [config/powerfeather.yaml](config/powerfeather.yaml) for a full local
-development config that exposes every supported entity.
+See [test/configs/powerfeather.yaml](test/configs/powerfeather.yaml) for the
+internal development/test fixture that exposes every supported entity.
 
 ## Entities
 
@@ -167,19 +173,32 @@ unknown at boot until you set them from Home Assistant or YAML automation.
 The CI checks can also be run locally with Docker:
 
 ```bash
-bash scripts/esphome-ci.sh validate
-bash scripts/esphome-ci.sh compile esp-idf v2
-bash scripts/esphome-ci.sh compile arduino v2
+bash test/scripts/esphome-ci.sh validate
+bash test/scripts/esphome-ci.sh compile esp-idf v2
+bash test/scripts/esphome-ci.sh compile arduino v2
 ```
 
 Run the full validation and compile matrix:
 
 ```bash
-bash scripts/esphome-ci.sh all
+bash test/scripts/esphome-ci.sh all
 ```
 
 The script uses the official ESPHome Docker image by default:
 
 ```bash
-ESPHOME_DOCKER_IMAGE=ghcr.io/esphome/esphome:stable bash scripts/esphome-ci.sh all
+ESPHOME_DOCKER_IMAGE=ghcr.io/esphome/esphome:stable bash test/scripts/esphome-ci.sh all
+```
+
+## Flashing Helper
+
+For local board bring-up, [test/](test/) contains a convenience `justfile` that
+validates, compiles, flashes, and follows logs with the official ESPHome Docker
+image:
+
+```bash
+cd test
+export WIFI_SSID="..."
+export WIFI_PASSWORD="..."
+just v2-idf /dev/ttyACM0
 ```
