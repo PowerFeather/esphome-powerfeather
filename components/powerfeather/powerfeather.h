@@ -125,12 +125,13 @@ namespace esphome
       void set_battery_high_voltage_alarm_value(number::Number *value) { battery_high_voltage_alarm_value_ = value; }
       void set_battery_low_charge_alarm_value(number::Number *value) { battery_low_charge_alarm_value_ = value; }
 
-      void send_task_update(TaskUpdate update);
+      bool send_task_update(TaskUpdate update);
 
     private:
       static const size_t UPDATE_TASK_STACK_SIZE_ = 3192;
       static const size_t UPDATE_TASK_QUEUE_SIZE_ = 10;
       static const uint32_t UPDATE_TASK_SENSOR_UPDATE_MS_ = 150;
+      static const uint32_t UPDATE_TASK_QUEUE_SEND_TIMEOUT_MS_ = 50;
 
       int32_t battery_capacity_{0};
       PowerFeather::Mainboard::BatteryType battery_type_{PowerFeather::Mainboard::BatteryType::Generic_3V7};

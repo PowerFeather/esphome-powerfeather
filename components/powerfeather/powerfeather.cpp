@@ -612,18 +612,20 @@ namespace esphome
       }
     }
 
-    void PowerFeatherMainboard::send_task_update(TaskUpdate update)
+    bool PowerFeatherMainboard::send_task_update(TaskUpdate update)
     {
       if (update_task_queue_ == NULL)
       {
         ESP_LOGW(TAG, "PowerFeather update queue is not available");
-        return;
+        return false;
       }
 
-      if (xQueueSend(update_task_queue_, &update, portMAX_DELAY) != pdTRUE)
+      if (xQueueSend(update_task_queue_, &update, pdMS_TO_TICKS(UPDATE_TASK_QUEUE_SEND_TIMEOUT_MS_)) != pdTRUE)
       {
         ESP_LOGW(TAG, "Failed to queue PowerFeather update");
+        return false;
       }
+      return true;
     }
 
     void PowerFeatherMainboard::send_control_state_(TaskUpdate update)
