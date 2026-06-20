@@ -11,3 +11,6 @@
 **/platformio.ini
 **/__pycache__
 /secrets.yaml
+.envrc
+
+flash/
